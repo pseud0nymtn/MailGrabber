@@ -54,16 +54,39 @@
     <Grid Grid.Row="3" ColumnDefinitions="1.0*,2.0*" ColumnSpacing="12">
       <!-- Clusters Panel -->
       <Border Grid.Column="0" Classes="card">
-        <Grid RowDefinitions="Auto,*" RowSpacing="8">
-          <TextBlock Text="Clusters (Select to Filter)" FontSize="16" FontWeight="SemiBold" />
+        <Grid RowDefinitions="Auto,Auto,*" RowSpacing="8">
+          <TextBlock Text="Clusters (Mark to Filter)" FontSize="16" FontWeight="SemiBold" />
 
-          <ListBox Grid.Row="1"
-                   ItemsSource="{Binding AllClusters}"
-                   SelectionMode="Multiple"
+          <StackPanel Grid.Row="1"
+                      Orientation="Horizontal"
+                      Spacing="12"
+                      VerticalAlignment="Center">
+            <ToggleSwitch HorizontalAlignment="Left"
+                          Content="Show only marked"
+                          IsChecked="{Binding ShowOnlyMarkedClusters}" />
+            <TextBlock VerticalAlignment="Center"
+                       Opacity="0.75"
+                       FontSize="12"
+                       Text="{Binding MarkedClusterCount, StringFormat='({0} marked)'}" />
+          </StackPanel>
+
+          <ListBox Grid.Row="2"
+                   x:Name="ClusterFilterList"
+                   ItemsSource="{Binding FilterClusters}"
+                   SelectionMode="Single"
+                   SelectedItem="{Binding SelectedFilterCluster}"
                    Background="Transparent">
             <ListBox.ItemTemplate>
               <DataTemplate x:DataType="vm:SelectableClusterViewModel">
-                <CheckBox Margin="0,2" Content="{Binding DisplayText}" IsChecked="{Binding IsSelected}" />
+                <Grid Margin="0,2" ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                  <CheckBox Grid.Column="0"
+                            VerticalAlignment="Center"
+                            IsChecked="{Binding IsSelected}"
+                            Content="" />
+                  <TextBlock Grid.Column="1"
+                             VerticalAlignment="Center"
+                             Text="{Binding DisplayText}" />
+                </Grid>
               </DataTemplate>
             </ListBox.ItemTemplate>
           </ListBox>
@@ -102,8 +125,10 @@
         <TextBlock Text="Run Status" FontSize="14" FontWeight="SemiBold" />
         <TextBlock Grid.Row="1" Text="{Binding StatusMessage}" TextWrapping="Wrap" />
         <TextBox Grid.Row="2"
+           x:Name="RunLogTextBox"
                  IsReadOnly="True"
                  Text="{Binding RunLog}"
+           TextChanged="OnRunLogTextChanged"
                  AcceptsReturn="True"
                  Height="100"
                  ScrollViewer.VerticalScrollBarVisibility="Auto" />

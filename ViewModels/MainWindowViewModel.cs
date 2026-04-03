@@ -1,30 +1,19 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text;
-using System.Windows.Input;
-using MailGrabber.Infrastructure;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MailGrabber.Models;
 using MailGrabber.Services;
 
 namespace MailGrabber.ViewModels;
 
-public sealed class MainWindowViewModel : ViewModelBase
+public partial class MainWindowViewModel : ObservableObject
 {
-    private readonly AsyncCommand _runCommand;
-    private readonly RelayCommand _openHtmlViewerCommand;
-    private readonly RelayCommand _openOutputFolderCommand;
-    private readonly RelayCommand _clearFilterCommand;
-
-    private string _configPath = "appsettings.json";
-    private string _statusMessage = "Ready";
-    private string _runLog = string.Empty;
-    private bool _isBusy;
-    private ClusterBucketViewModel? _selectedCluster;
     private string _lastHtmlOutputPath = "output/cluster-viewer.html";
-    private string _searchText = string.Empty;
     private ClusterReport? _fullReport;
     private bool _enableOutlookOverride = true;
-    private bool _enableGmailOverride = false;
+    private bool _enableGmailOverride;
     private bool _enableNewsletterClusteringOverride = true;
     private int _maxMessagesOverride = 2000;
     private string _outputPathOverride = "output/sender-clusters.csv";
@@ -32,23 +21,109 @@ public sealed class MainWindowViewModel : ViewModelBase
     private string _htmlOutputPathOverride = "output/cluster-viewer.html";
     private AppSettings? _lastLoadedSettings;
 
+    [ObservableProperty]
+    private string configPath = "appsettings.json";
+
+    [ObservableProperty]
+    private string statusMessage = "Ready";
+
+    [ObservableProperty]
+    private string runLog = string.Empty;
+
+    [ObservableProperty]
+    private bool isBusy;
+
+    [ObservableProperty]
+    private ClusterBucketViewModel? selectedCluster;
+
+    [ObservableProperty]
+    private string searchText = string.Empty;
+
+    [ObservableProperty]
+    private bool showOnlyMarkedClusters;
+
+    [ObservableProperty]
+    private SelectableClusterViewModel? selectedFilterCluster;
+
+    [ObservableProperty]
+    private int markedClusterCount;
+
     public MainWindowViewModel()
     {
         Clusters = new ObservableCollection<ClusterBucketViewModel>();
         AllClusters = new ObservableCollection<SelectableClusterViewModel>();
+        FilterClusters = new ObservableCollection<SelectableClusterViewModel>();
         SenderRows = new ObservableCollection<SenderRowViewModel>();
 
-        _runCommand = new AsyncCommand(RunAsync, () => !IsBusy);
-        _openHtmlViewerCommand = new RelayCommand(OpenHtmlViewer, CanOpenHtmlViewer);
-        _openOutputFolderCommand = new RelayCommand(OpenOutputFolder);
-        _clearFilterCommand = new RelayCommand(ClearFilter);
-
-        RunCommand = _runCommand;
-        OpenHtmlViewerCommand = _openHtmlViewerCommand;
-        OpenOutputFolderCommand = _openOutputFolderCommand;
-        ClearFilterCommand = _clearFilterCommand;
+        RunCommand = new AsyncRelayCommand(RunAsync, CanRun);
+        OpenHtmlViewerCommand = new RelayCommand(OpenHtmlViewer, CanOpenHtmlViewer);
+        OpenOutputFolderCommand = new RelayCommand(OpenOutputFolder);
+        ClearFilterCommand = new RelayCommand(ClearFilter);
 
         LoadSettingsFromConfig();
+    }
+
+    public ObservableCollection<ClusterBucketViewModel> Clusters { get; }
+
+    public ObservableCollection<SelectableClusterViewModel> AllClusters { get; }
+
+    public ObservableCollection<SelectableClusterViewModel> FilterClusters { get; }
+
+    public ObservableCollection<SenderRowViewModel> SenderRows { get; }
+
+    public IAsyncRelayCommand RunCommand { get; }
+
+    public IRelayCommand OpenHtmlViewerCommand { get; }
+
+    public IRelayCommand OpenOutputFolderCommand { get; }
+
+    public IRelayCommand ClearFilterCommand { get; }
+
+    public AppSettings? LastLoadedSettings => _lastLoadedSettings;
+
+    partial void OnIsBusyChanged(bool value)
+    {
+        RunCommand.NotifyCanExecuteChanged();
+        OpenHtmlViewerCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnSelectedClusterChanged(ClusterBucketViewModel? value)
+    {
+        RefreshSenderRows(value);
+    }
+
+    partial void OnSearchTextChanged(string value)
+    {
+        ApplyFiltersAndSearch();
+    }
+
+    partial void OnShowOnlyMarkedClustersChanged(bool value)
+    {
+        RefreshFilterClusters();
+        ApplyFiltersAndSearch();
+    }
+
+    public (bool EnableOutlook, bool EnableGmail, int MaxMessages, bool EnableNewsletterClustering,
+        string ConfigPath, string OutputPath, string JsonOutputPath, string HtmlOutputPath) GetCurrentSettings()
+    {
+        return (_enableOutlookOverride, _enableGmailOverride, _maxMessagesOverride, _enableNewsletterClusteringOverride,
+            ConfigPath, _outputPathOverride, _jsonOutputPathOverride, _htmlOutputPathOverride);
+    }
+
+    public void ApplySettings(bool enableOutlook, bool enableGmail, int maxMessages,
+        bool enableNewsletterClustering, string newConfigPath,
+        string outputPath, string jsonOutputPath, string htmlOutputPath)
+    {
+        _enableOutlookOverride = enableOutlook;
+        _enableGmailOverride = enableGmail;
+        _maxMessagesOverride = maxMessages;
+        _enableNewsletterClusteringOverride = enableNewsletterClustering;
+        ConfigPath = newConfigPath;
+        _outputPathOverride = outputPath;
+        _jsonOutputPathOverride = jsonOutputPath;
+        _htmlOutputPathOverride = htmlOutputPath;
+        _lastHtmlOutputPath = htmlOutputPath;
+        StatusMessage = "Settings updated.";
     }
 
     private void LoadSettingsFromConfig()
@@ -73,104 +148,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
-        public (bool EnableOutlook, bool EnableGmail, int MaxMessages, bool EnableNewsletterClustering,
-            string ConfigPath, string OutputPath, string JsonOutputPath, string HtmlOutputPath) GetCurrentSettings()
-        {
-        return (_enableOutlookOverride, _enableGmailOverride, _maxMessagesOverride, _enableNewsletterClusteringOverride,
-            _configPath, _outputPathOverride, _jsonOutputPathOverride, _htmlOutputPathOverride);
-        }
-
-        public AppSettings? LastLoadedSettings => _lastLoadedSettings;
-
-    public string ConfigPath
+    private bool CanRun()
     {
-        get => _configPath;
-        set => SetProperty(ref _configPath, value);
-    }
-
-    public string StatusMessage
-    {
-        get => _statusMessage;
-        private set => SetProperty(ref _statusMessage, value);
-    }
-
-    public string RunLog
-    {
-        get => _runLog;
-        private set => SetProperty(ref _runLog, value);
-    }
-
-    public bool IsBusy
-    {
-        get => _isBusy;
-        private set
-        {
-            if (!SetProperty(ref _isBusy, value))
-            {
-                return;
-            }
-
-            _runCommand.RaiseCanExecuteChanged();
-            _openHtmlViewerCommand.RaiseCanExecuteChanged();
-        }
-    }
-
-    public ObservableCollection<ClusterBucketViewModel> Clusters { get; }
-
-    public ObservableCollection<SelectableClusterViewModel> AllClusters { get; }
-
-    public ObservableCollection<SenderRowViewModel> SenderRows { get; }
-
-    public ClusterBucketViewModel? SelectedCluster
-    {
-        get => _selectedCluster;
-        set
-        {
-            if (!SetProperty(ref _selectedCluster, value))
-            {
-                return;
-            }
-
-            RefreshSenderRows(value);
-        }
-    }
-
-    public string SearchText
-    {
-        get => _searchText;
-        set
-        {
-            if (!SetProperty(ref _searchText, value))
-            {
-                return;
-            }
-
-            ApplyFiltersAndSearch();
-        }
-    }
-
-    public ICommand RunCommand { get; }
-
-    public ICommand OpenHtmlViewerCommand { get; }
-
-    public ICommand OpenOutputFolderCommand { get; }
-
-    public ICommand ClearFilterCommand { get; }
-
-    public void ApplySettings(bool enableOutlook, bool enableGmail, int maxMessages,
-        bool enableNewsletterClustering, string configPath,
-        string outputPath, string jsonOutputPath, string htmlOutputPath)
-    {
-        _enableOutlookOverride = enableOutlook;
-        _enableGmailOverride = enableGmail;
-        _maxMessagesOverride = maxMessages;
-        _enableNewsletterClusteringOverride = enableNewsletterClustering;
-        ConfigPath = configPath;
-        _outputPathOverride = outputPath;
-        _jsonOutputPathOverride = jsonOutputPath;
-        _htmlOutputPathOverride = htmlOutputPath;
-        _lastHtmlOutputPath = htmlOutputPath;
-        StatusMessage = "Settings updated.";
+        return !IsBusy;
     }
 
     private async Task RunAsync()
@@ -212,7 +192,6 @@ public sealed class MainWindowViewModel : ViewModelBase
         finally
         {
             IsBusy = false;
-            _openHtmlViewerCommand.RaiseCanExecuteChanged();
         }
     }
 
@@ -228,17 +207,48 @@ public sealed class MainWindowViewModel : ViewModelBase
             AllClusters.Add(new SelectableClusterViewModel(cluster, OnClusterSelectionChanged));
         }
 
+        RefreshFilterClusters();
         ApplyFiltersAndSearch();
         SelectedCluster = Clusters.FirstOrDefault();
+        SelectedFilterCluster = FilterClusters.FirstOrDefault();
     }
 
     private void OnClusterSelectionChanged()
     {
+        UpdateMarkedClusterCount();
+        RefreshFilterClusters();
         ApplyFiltersAndSearch();
+    }
+
+    private void UpdateMarkedClusterCount()
+    {
+        MarkedClusterCount = AllClusters.Count(c => c.IsSelected);
+    }
+
+    private void RefreshFilterClusters()
+    {
+        var previous = SelectedFilterCluster?.Cluster;
+        var items = ShowOnlyMarkedClusters
+            ? AllClusters.Where(c => c.IsSelected).ToList()
+            : AllClusters.ToList();
+
+        FilterClusters.Clear();
+        foreach (var item in items)
+        {
+            FilterClusters.Add(item);
+        }
+
+        SelectedFilterCluster = FilterClusters.FirstOrDefault(c => c.Cluster.Equals(previous, StringComparison.OrdinalIgnoreCase))
+            ?? FilterClusters.FirstOrDefault();
     }
 
     private void ApplyFiltersAndSearch()
     {
+        if (_fullReport is null)
+        {
+            return;
+        }
+
         var selectedClusterNames = AllClusters
             .Where(c => c.IsSelected)
             .Select(c => c.Cluster)
@@ -246,18 +256,12 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         var search = SearchText?.Trim() ?? string.Empty;
         var hasSearch = !string.IsNullOrWhiteSpace(search);
-        var hasClusterFilter = selectedClusterNames.Count > 0 && selectedClusterNames.Count < AllClusters.Count;
-
-        if (_fullReport is null)
-        {
-            return;
-        }
 
         Clusters.Clear();
 
         var clustersToShow = _fullReport.Clusters.Where(cluster =>
         {
-            var clusterMatches = !hasClusterFilter || selectedClusterNames.Contains(cluster.Cluster);
+            var clusterMatches = !ShowOnlyMarkedClusters || selectedClusterNames.Contains(cluster.Cluster);
             if (!clusterMatches)
             {
                 return false;
@@ -313,10 +317,16 @@ public sealed class MainWindowViewModel : ViewModelBase
     private void ClearFilter()
     {
         SearchText = string.Empty;
+        ShowOnlyMarkedClusters = false;
+
         foreach (var cluster in AllClusters)
         {
             cluster.IsSelected = false;
         }
+
+        UpdateMarkedClusterCount();
+        RefreshFilterClusters();
+        ApplyFiltersAndSearch();
     }
 
     private void AppendLog(string message)
@@ -337,12 +347,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private bool CanOpenHtmlViewer()
     {
-        if (IsBusy)
-        {
-            return false;
-        }
-
-        return File.Exists(Path.GetFullPath(_lastHtmlOutputPath));
+        return !IsBusy && File.Exists(Path.GetFullPath(_lastHtmlOutputPath));
     }
 
     private void OpenHtmlViewer()
@@ -389,8 +394,23 @@ public sealed class MainWindowViewModel : ViewModelBase
     }
 }
 
-public sealed class ClusterBucketViewModel
+public partial class ClusterBucketViewModel : ObservableObject
 {
+    [ObservableProperty]
+    private string cluster = string.Empty;
+
+    [ObservableProperty]
+    private bool isNewsletterCluster;
+
+    [ObservableProperty]
+    private int senderCount;
+
+    [ObservableProperty]
+    private int messageCount;
+
+    [ObservableProperty]
+    private List<SenderRowViewModel> senderAddresses = [];
+
     public ClusterBucketViewModel(ClusterBucket bucket)
     {
         Cluster = bucket.Cluster;
@@ -400,23 +420,24 @@ public sealed class ClusterBucketViewModel
         SenderAddresses = bucket.SenderAddresses.Select(sender => new SenderRowViewModel(sender)).ToList();
     }
 
-    public string Cluster { get; }
-
-    public bool IsNewsletterCluster { get; }
-
-    public int SenderCount { get; }
-
-    public int MessageCount { get; }
-
-    public List<SenderRowViewModel> SenderAddresses { get; }
-
     public string Summary => $"{SenderCount} senders / {MessageCount} messages";
 }
 
-public sealed class SelectableClusterViewModel : ViewModelBase
+public partial class SelectableClusterViewModel : ObservableObject
 {
-    private bool _isSelected;
     private readonly Action _onChanged;
+
+    [ObservableProperty]
+    private string cluster = string.Empty;
+
+    [ObservableProperty]
+    private int messageCount;
+
+    [ObservableProperty]
+    private int senderCount;
+
+    [ObservableProperty]
+    private bool isSelected;
 
     public SelectableClusterViewModel(ClusterBucket bucket, Action onChanged)
     {
@@ -426,31 +447,37 @@ public sealed class SelectableClusterViewModel : ViewModelBase
         _onChanged = onChanged;
     }
 
-    public string Cluster { get; }
-
-    public int MessageCount { get; }
-
-    public int SenderCount { get; }
-
-    public bool IsSelected
+    partial void OnIsSelectedChanged(bool value)
     {
-        get => _isSelected;
-        set
-        {
-            if (!SetProperty(ref _isSelected, value))
-            {
-                return;
-            }
-
-            _onChanged?.Invoke();
-        }
+        _onChanged?.Invoke();
     }
 
     public string DisplayText => $"{Cluster} ({SenderCount} senders, {MessageCount} messages)";
 }
 
-public sealed class SenderRowViewModel
+public partial class SenderRowViewModel : ObservableObject
 {
+    [ObservableProperty]
+    private string senderAddress = string.Empty;
+
+    [ObservableProperty]
+    private string senderName = string.Empty;
+
+    [ObservableProperty]
+    private string domain = string.Empty;
+
+    [ObservableProperty]
+    private int messageCount;
+
+    [ObservableProperty]
+    private string providers = string.Empty;
+
+    [ObservableProperty]
+    private string accounts = string.Empty;
+
+    [ObservableProperty]
+    private string sampleSubjects = string.Empty;
+
     public SenderRowViewModel(ClusteredSenderRow row)
     {
         SenderAddress = row.SenderAddress;
@@ -461,18 +488,4 @@ public sealed class SenderRowViewModel
         Accounts = string.Join(", ", row.SourceAccounts);
         SampleSubjects = row.SampleSubjects.Count == 0 ? "-" : string.Join(" | ", row.SampleSubjects);
     }
-
-    public string SenderAddress { get; }
-
-    public string SenderName { get; }
-
-    public string Domain { get; }
-
-    public int MessageCount { get; }
-
-    public string Providers { get; }
-
-    public string Accounts { get; }
-
-    public string SampleSubjects { get; }
 }

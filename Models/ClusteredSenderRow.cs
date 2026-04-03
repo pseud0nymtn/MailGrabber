@@ -1,28 +1,42 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace MailGrabber.Models;
 
-public sealed class ClusteredSenderRow
+public partial class ClusteredSenderRow : ObservableObject
 {
-    public required string Cluster { get; init; }
+    [ObservableProperty]
+    private string cluster = string.Empty;
 
-    public required string Tld { get; init; }
+    [ObservableProperty]
+    private string tld = string.Empty;
 
-    public required string Domain { get; init; }
+    [ObservableProperty]
+    private string domain = string.Empty;
 
-    public required string SenderAddress { get; init; }
+    [ObservableProperty]
+    private string senderAddress = string.Empty;
 
-    public required string SenderName { get; init; }
+    [ObservableProperty]
+    private string senderName = string.Empty;
 
-    public required List<string> Providers { get; init; }
+    [ObservableProperty]
+    private List<string> providers = [];
 
-    public required List<string> SourceAccounts { get; init; }
+    [ObservableProperty]
+    private List<string> sourceAccounts = [];
 
-    public int MessageCount { get; init; }
+    [ObservableProperty]
+    private int messageCount;
 
-    public DateTimeOffset? FirstSeenUtc { get; init; }
+    [ObservableProperty]
+    private DateTimeOffset? firstSeenUtc;
 
-    public DateTimeOffset? LastSeenUtc { get; init; }
+    [ObservableProperty]
+    private DateTimeOffset? lastSeenUtc;
 
-    public bool IsNewsletter { get; init; }
+    [ObservableProperty]
+    private bool isNewsletter;
 
-    public required List<string> SampleSubjects { get; init; }
+    [ObservableProperty]
+    private List<string> sampleSubjects = [];
 }

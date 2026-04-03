@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using MailGrabber.ViewModels;
 
@@ -18,6 +19,37 @@ public partial class MainWindow : Window
         {
             settingsButton.Click += OnSettingsButtonClick;
         }
+
+        if (this.FindControl<ListBox>("ClusterFilterList") is ListBox clusterFilterList)
+        {
+            clusterFilterList.KeyDown += OnClusterFilterListKeyDown;
+        }
+    }
+
+    private void OnClusterFilterListKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Space || DataContext is not MainWindowViewModel vm)
+        {
+            return;
+        }
+
+        if (vm.SelectedFilterCluster is null)
+        {
+            return;
+        }
+
+        vm.SelectedFilterCluster.IsSelected = !vm.SelectedFilterCluster.IsSelected;
+        e.Handled = true;
+    }
+
+    private void OnRunLogTextChanged(object? sender, TextChangedEventArgs e)
+    {
+        if (sender is not TextBox textBox)
+        {
+            return;
+        }
+
+        textBox.CaretIndex = textBox.Text?.Length ?? 0;
     }
 
     private async void OnSettingsButtonClick(object? sender, RoutedEventArgs e)

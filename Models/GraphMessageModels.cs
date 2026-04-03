@@ -1,35 +1,45 @@
 using System.Text.Json.Serialization;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace MailGrabber.Models;
 
-public sealed class GraphMessagePage
+public partial class GraphMessagePage : ObservableObject
 {
-    [JsonPropertyName("value")]
-    public List<GraphMessageItem> Value { get; set; } = [];
+    [property: JsonPropertyName("value")]
+    [ObservableProperty]
+    private List<GraphMessageItem> value = [];
 
-    [JsonPropertyName("@odata.nextLink")]
-    public string? NextLink { get; set; }
+    [property: JsonPropertyName("@odata.nextLink")]
+    [ObservableProperty]
+    private string? nextLink;
 }
 
-public sealed class GraphMessageItem
+public partial class GraphMessageItem : ObservableObject
 {
-    public string? Subject { get; set; }
+    [ObservableProperty]
+    private string? subject;
 
-    public DateTimeOffset? ReceivedDateTime { get; set; }
+    [ObservableProperty]
+    private DateTimeOffset? receivedDateTime;
 
-    public GraphRecipient? From { get; set; }
+    [ObservableProperty]
+    private GraphRecipient? from;
 
-    public GraphRecipient? Sender { get; set; }
+    [ObservableProperty]
+    private GraphRecipient? sender;
 }
 
-public sealed class GraphRecipient
+public partial class GraphRecipient : ObservableObject
 {
-    public GraphEmailAddress? EmailAddress { get; set; }
+    [ObservableProperty]
+    private GraphEmailAddress? emailAddress;
 }
 
-public sealed class GraphEmailAddress
+public partial class GraphEmailAddress : ObservableObject
 {
-    public string? Address { get; set; }
+    [ObservableProperty]
+    private string? address;
 
-    public string? Name { get; set; }
+    [ObservableProperty]
+    private string? name;
 }
