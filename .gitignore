@@ -1,0 +1,14 @@
+bin/
+obj/
+output/
+appsettings.json
+google-client-secret.json
+*.env
+.env
+.env.*
+auth-record.bin
+gmail-token/
+token.json
+*.secrets.json
+*.pfx
+*.pem
