@@ -17,7 +17,7 @@
         RowSpacing="18">
         <StackPanel Spacing="3">
             <TextBlock Classes="settingsHeader" Text="Analysis Settings" />
-            <TextBlock Classes="settingsSubHeader" Text="Provider, Limits und Export in einem Blick." />
+            <TextBlock Classes="settingsSubHeader" Text="Provider, Limits and Export at a glance." />
         </StackPanel>
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
@@ -65,6 +65,7 @@
                                 Grid.Column="1"
                                 Maximum="999999"
                                 Minimum="1"
+                                FormatString="0"
                                 Value="{Binding MaxMessages}" />
                         </Grid>
                     </StackPanel>

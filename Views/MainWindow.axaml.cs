@@ -104,6 +104,9 @@ public partial class MainWindow : Window
                 settingsViewModel.JsonOutputPath,
                 settingsViewModel.HtmlOutputPath
             );
+
+            // Persist the changes to disk so they survive an app restart.
+            settingsViewModel.SaveToPath(settingsViewModel.ConfigPath);
         }
     }
 }
