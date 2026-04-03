@@ -1,0 +1,121 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:MailGrabber.ViewModels"
+        x:Class="MailGrabber.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        mc:Ignorable="d"
+        Width="1400"
+        Height="900"
+        MinWidth="1000"
+        MinHeight="700"
+        Title="MailGrabber - Sender Cluster Studio">
+  <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Margin="18" RowSpacing="12">
+    <!-- Header -->
+    <TextBlock Classes="headline" Text="MailGrabber Sender Cluster Studio" />
+
+    <!-- Control Row -->
+    <Border Grid.Row="1" Classes="card">
+      <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="10">
+        <TextBox Grid.Column="0"
+                 Watermark="Path to appsettings.json"
+                 Text="{Binding ConfigPath}" />
+
+        <Button Grid.Column="1"
+                MinWidth="120"
+                Command="{Binding RunCommand}"
+                Content="Run Analysis" />
+
+        <Button Grid.Column="2"
+                MinWidth="120"
+                Command="{Binding OpenHtmlViewerCommand}"
+                Content="Open Viewer" />
+
+        <Button Grid.Column="3"
+                MinWidth="130"
+                Command="{Binding OpenOutputFolderCommand}"
+                Content="Open Output Folder" />
+
+        <Button Grid.Column="4"
+                x:Name="SettingsButton"
+                MinWidth="90"
+                Content="Settings" />
+      </Grid>
+    </Border>
+
+    <!-- Search Row -->
+    <Border Grid.Row="2" Classes="card">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+        <TextBox Grid.Column="0"
+                 Watermark="Search clusters and senders..."
+                 Text="{Binding SearchText}" />
+
+        <Button Grid.Column="1"
+                MinWidth="100"
+                Command="{Binding ClearFilterCommand}"
+                Content="Clear Filters" />
+      </Grid>
+    </Border>
+
+    <!-- Main Content -->
+    <Grid Grid.Row="3" ColumnDefinitions="1.0*,2.0*" ColumnSpacing="12">
+      <!-- Clusters Panel -->
+      <Border Grid.Column="0" Classes="card">
+        <Grid RowDefinitions="Auto,*" RowSpacing="8">
+          <TextBlock Text="Clusters (Select to Filter)" FontSize="16" FontWeight="SemiBold" />
+
+          <ListBox Grid.Row="1"
+                   ItemsSource="{Binding AllClusters}"
+                   SelectionMode="Multiple"
+                   Background="Transparent">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:SelectableClusterViewModel">
+                <CheckBox Margin="0,2" Content="{Binding DisplayText}" IsChecked="{Binding IsSelected}" />
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </Grid>
+      </Border>
+
+      <!-- Senders Panel -->
+      <Border Grid.Column="1" Classes="card">
+        <Grid RowDefinitions="Auto,*" RowSpacing="8">
+          <TextBlock Text="Senders in Selected Cluster" FontSize="16" FontWeight="SemiBold" />
+
+          <ListBox Grid.Row="1" ItemsSource="{Binding SenderRows}">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:SenderRowViewModel">
+                <Border Margin="0,0,0,6" Padding="10" Background="#1FFFFFFF" CornerRadius="8">
+                  <Grid ColumnDefinitions="2.5*,1.1*,0.8*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="8" RowSpacing="4">
+                    <TextBlock Grid.Column="0" Text="{Binding SenderAddress}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Grid.Column="1" Text="{Binding Domain}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Grid.Column="2" Text="{Binding MessageCount}" HorizontalAlignment="Right" />
+
+                    <TextBlock Grid.Row="1" Grid.ColumnSpan="3" Text="{Binding SenderName}" Opacity="0.85" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="{Binding Providers}" Opacity="0.8" Foreground="#FF666666" FontSize="11" />
+                    <TextBlock Grid.Row="3" Grid.ColumnSpan="3" Text="{Binding SampleSubjects}" Opacity="0.7" TextWrapping="Wrap" FontSize="11" Foreground="#FF999999" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </Grid>
+      </Border>
+    </Grid>
+
+    <!-- Status Row -->
+    <Border Grid.Row="4" Classes="card" Padding="10">
+      <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+        <TextBlock Text="Run Status" FontSize="14" FontWeight="SemiBold" />
+        <TextBlock Grid.Row="1" Text="{Binding StatusMessage}" TextWrapping="Wrap" />
+        <TextBox Grid.Row="2"
+                 IsReadOnly="True"
+                 Text="{Binding RunLog}"
+                 AcceptsReturn="True"
+                 Height="100"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto" />
+      </Grid>
+    </Border>
+  </Grid>
+</Window>

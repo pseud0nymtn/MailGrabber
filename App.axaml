@@ -1,0 +1,31 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="MailGrabber.App"
+             RequestedThemeVariant="Light">
+  <Application.Styles>
+    <FluentTheme />
+
+    <Style Selector="Window">
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+          <GradientStop Offset="0" Color="#FFF7F1E8" />
+          <GradientStop Offset="1" Color="#FFEAF3F4" />
+        </LinearGradientBrush>
+      </Setter>
+    </Style>
+
+    <Style Selector="TextBlock.headline">
+      <Setter Property="FontSize" Value="24" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#FF2D3A3A" />
+    </Style>
+
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="#F8FFFFFF" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Padding" Value="14" />
+      <Setter Property="BorderBrush" Value="#33A0A0A0" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+  </Application.Styles>
+</Application>

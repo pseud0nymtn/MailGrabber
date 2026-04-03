@@ -1,0 +1,121 @@
+<Window
+    x:Class="MailGrabber.Views.SettingsWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:MailGrabber.ViewModels"
+    Title="Settings"
+    Width="540"
+    Height="620"
+    x:DataType="vm:SettingsDialogViewModel"
+    WindowStartupLocation="CenterOwner"
+    mc:Ignorable="d">
+    <Grid
+        Margin="20"
+        RowDefinitions="Auto,*,Auto"
+        RowSpacing="20">
+        <TextBlock
+            FontSize="18"
+            FontWeight="SemiBold"
+            Text="Analysis Settings" />
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Margin="0,10" Spacing="16">
+                <Border
+                    Padding="14"
+                    Background="#F8FFFFFF"
+                    BorderBrush="#33A0A0A0"
+                    BorderThickness="1"
+                    CornerRadius="8">
+                    <StackPanel Spacing="12">
+                        <TextBlock
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            Text="Providers" />
+                        <CheckBox Content="Enable Outlook" IsChecked="{Binding EnableOutlook}" />
+                        <CheckBox Content="Enable Gmail" IsChecked="{Binding EnableGmail}" />
+                    </StackPanel>
+                </Border>
+
+                <Border
+                    Padding="14"
+                    Background="#F8FFFFFF"
+                    BorderBrush="#33A0A0A0"
+                    BorderThickness="1"
+                    CornerRadius="8">
+                    <StackPanel Spacing="12">
+                        <TextBlock
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            Text="Message Limits" />
+                        <Grid ColumnDefinitions="180,*" ColumnSpacing="10">
+                            <TextBlock VerticalAlignment="Center" Text="Max Messages:" />
+                            <NumericUpDown
+                                Grid.Column="1"
+                                Maximum="999999"
+                                Minimum="1"
+                                Value="{Binding MaxMessages}" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border
+                    Padding="14"
+                    Background="#F8FFFFFF"
+                    BorderBrush="#33A0A0A0"
+                    BorderThickness="1"
+                    CornerRadius="8">
+                    <StackPanel Spacing="12">
+                        <TextBlock
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            Text="Output Paths" />
+                        <Grid RowSpacing="10" ColumnSpacing="10" VerticalAlignment="Center" HorizontalAlignment="Left">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                                <TextBlock Text="CSV Output:" />
+                                <TextBox Grid.Column="1" Text="{Binding OutputPath}" Watermark="output/sender-clusters.csv" />
+                                
+                                <TextBlock Grid.Row="1" Text="JSON Output:" />
+                                <TextBox
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    Text="{Binding JsonOutputPath}"
+                                    Watermark="output/sender-clusters.json" />
+
+                                <TextBlock Grid.Row="2" Text="HTML Viewer:" />
+                                <TextBox
+                                    Grid.Row="2"
+                                    Grid.Column="1"
+                                    Text="{Binding HtmlOutputPath}"
+                                    Watermark="output/cluster-viewer.html" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel
+            Grid.Row="2"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal"
+            Spacing="10">
+            <Button
+                MinWidth="100"
+                Command="{Binding CancelCommand}"
+                Content="Cancel" />
+            <Button
+                MinWidth="100"
+                Command="{Binding OkCommand}"
+                Content="OK" />
+        </StackPanel>
+    </Grid>
+</Window>
