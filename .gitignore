@@ -1,6 +1,7 @@
 bin/
 obj/
 output/
+TestResults/
 appsettings.json
 google-client-secret.json
 *.env

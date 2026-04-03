@@ -142,6 +142,20 @@ Default files:
 - `Open Viewer` launches the generated HTML viewer.
 - `Open Output Folder` opens the export folder in your file manager.
 
+## Tests
+
+Run all tests (unit + integration):
+
+```bash
+dotnet test
+```
+
+Run only integration/UI smoke tests:
+
+```bash
+dotnet test --filter "Category=Integration"
+```
+
 ## Security and Safe Push Checklist
 
 Before pushing, verify these points:
