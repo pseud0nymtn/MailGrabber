@@ -48,6 +48,15 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private int markedClusterCount;
 
+    [ObservableProperty]
+    private bool showSendersFromAllMarkedClusters;
+
+    [ObservableProperty]
+    private bool sortSendersByDomain;
+
+    [ObservableProperty]
+    private bool sortClustersAlphabetically;
+
     public MainWindowViewModel()
     {
         Clusters = new ObservableCollection<ClusterBucketViewModel>();
@@ -89,7 +98,22 @@ public partial class MainWindowViewModel : ObservableObject
 
     partial void OnSelectedClusterChanged(ClusterBucketViewModel? value)
     {
-        RefreshSenderRows(value);
+        RefreshSenderRows();
+    }
+
+    partial void OnShowSendersFromAllMarkedClustersChanged(bool value)
+    {
+        RefreshSenderRows();
+    }
+
+    partial void OnSortSendersByDomainChanged(bool value)
+    {
+        RefreshSenderRows();
+    }
+
+    partial void OnSortClustersAlphabeticallyChanged(bool value)
+    {
+        RefreshFilterClusters();
     }
 
     partial void OnSearchTextChanged(string value)
@@ -253,6 +277,12 @@ public partial class MainWindowViewModel : ObservableObject
             ? AllClusters.Where(c => c.IsSelected).ToList()
             : AllClusters.ToList();
 
+        // Apply sorting if enabled
+        if (SortClustersAlphabetically)
+        {
+            items = items.OrderBy(c => c.Cluster, StringComparer.OrdinalIgnoreCase).ToList();
+        }
+
         FilterClusters.Clear();
         foreach (var item in items)
         {
@@ -311,28 +341,72 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
-    private void RefreshSenderRows(ClusterBucketViewModel? cluster)
+    private void RefreshSenderRows()
     {
         SenderRows.Clear();
-        if (cluster is null)
+
+        List<SenderRowViewModel> allSenders = new();
+
+        if (ShowSendersFromAllMarkedClusters)
         {
-            return;
+            // Show senders from all marked clusters
+            var markedClusterNames = AllClusters
+                .Where(c => c.IsSelected)
+                .Select(c => c.Cluster)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            if (_fullReport is not null)
+            {
+                foreach (var cluster in _fullReport.Clusters)
+                {
+                    if (markedClusterNames.Contains(cluster.Cluster))
+                    {
+                        allSenders.AddRange(cluster.SenderAddresses.Select(s => new SenderRowViewModel(s)));
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Show senders only from selected cluster
+            if (SelectedCluster is null)
+            {
+                return;
+            }
+
+            allSenders.AddRange(SelectedCluster.SenderAddresses);
         }
 
+        // Apply search filter
         var search = SearchText?.Trim() ?? string.Empty;
         var hasSearch = !string.IsNullOrWhiteSpace(search);
 
         var senderRows = hasSearch
-            ? cluster.SenderAddresses.Where(s =>
+            ? allSenders.Where(s =>
                 s.SenderAddress.Contains(search, StringComparison.OrdinalIgnoreCase)
                 || s.Domain.Contains(search, StringComparison.OrdinalIgnoreCase)
                 || (s.SenderName?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false))
-            : cluster.SenderAddresses;
+            : allSenders;
+
+        // Apply sorting if enabled
+        if (SortSendersByDomain)
+        {
+            senderRows = senderRows.OrderBy(s => s.Domain, StringComparer.OrdinalIgnoreCase).ToList();
+        }
+        else
+        {
+            senderRows = senderRows.ToList();
+        }
 
         foreach (var sender in senderRows)
         {
             SenderRows.Add(sender);
         }
+    }
+
+    private void RefreshSenderRows(ClusterBucketViewModel? cluster)
+    {
+        RefreshSenderRows();
     }
 
     private void ClearFilter()

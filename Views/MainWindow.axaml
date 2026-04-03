@@ -68,6 +68,10 @@
                        Opacity="0.75"
                        FontSize="12"
                        Text="{Binding MarkedClusterCount, StringFormat='({0} marked)'}" />
+            <Separator Width="1" Background="#33A0A0A0" />
+            <ToggleSwitch HorizontalAlignment="Left"
+                          Content="Sort alphabetically"
+                          IsChecked="{Binding SortClustersAlphabetically}" />
           </StackPanel>
 
           <ListBox Grid.Row="2"
@@ -95,10 +99,22 @@
 
       <!-- Senders Panel -->
       <Border Grid.Column="1" Classes="card">
-        <Grid RowDefinitions="Auto,*" RowSpacing="8">
+        <Grid RowDefinitions="Auto,Auto,*" RowSpacing="8">
           <TextBlock Text="Senders in Selected Cluster" FontSize="16" FontWeight="SemiBold" />
 
-          <ListBox Grid.Row="1" ItemsSource="{Binding SenderRows}">
+          <StackPanel Grid.Row="1"
+                      Orientation="Horizontal"
+                      Spacing="20"
+                      VerticalAlignment="Center">
+            <ToggleSwitch HorizontalAlignment="Left"
+                          Content="Show from all marked clusters"
+                          IsChecked="{Binding ShowSendersFromAllMarkedClusters}" />
+            <ToggleSwitch HorizontalAlignment="Left"
+                          Content="Sort by domain"
+                          IsChecked="{Binding SortSendersByDomain}" />
+          </StackPanel>
+
+          <ListBox Grid.Row="2" ItemsSource="{Binding SenderRows}">
             <ListBox.ItemTemplate>
               <DataTemplate x:DataType="vm:SenderRowViewModel">
                 <Border Margin="0,0,0,6" Padding="10" Background="#1FFFFFFF" CornerRadius="8">
