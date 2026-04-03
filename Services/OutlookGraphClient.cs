@@ -1,11 +1,13 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Diagnostics.CodeAnalysis;
 using Azure.Core;
 using Azure.Identity;
 using MailGrabber.Models;
 
 namespace MailGrabber.Services;
 
+[ExcludeFromCodeCoverage]
 public sealed class OutlookGraphClient : IDisposable
 {
     private static readonly JsonSerializerOptions JsonOptions = new()

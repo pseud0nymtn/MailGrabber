@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Net.Mail;
+using System.Diagnostics.CodeAnalysis;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Gmail.v1;
 using Google.Apis.Gmail.v1.Data;
@@ -9,6 +10,7 @@ using MailGrabber.Models;
 
 namespace MailGrabber.Services;
 
+[ExcludeFromCodeCoverage]
 public sealed class GmailClient
 {
     private static readonly string[] GmailScopes = [GmailService.Scope.GmailReadonly];

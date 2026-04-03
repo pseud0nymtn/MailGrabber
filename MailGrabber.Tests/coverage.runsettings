@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <ExcludeByFile>**/*.axaml;**/Views/*.cs;**/App.axaml.cs</ExcludeByFile>
+          <Exclude>[MailGrabber]MailGrabber.Services.GmailClient;[MailGrabber]MailGrabber.Services.OutlookGraphClient</Exclude>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

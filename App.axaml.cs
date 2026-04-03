@@ -3,9 +3,11 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using MailGrabber.ViewModels;
 using MailGrabber.Views;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MailGrabber;
 
+[ExcludeFromCodeCoverage]
 public partial class App : Application
 {
     public override void Initialize()

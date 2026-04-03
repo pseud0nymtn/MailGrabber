@@ -2,9 +2,11 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using MailGrabber.ViewModels;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MailGrabber.Views;
 
+[ExcludeFromCodeCoverage]
 public partial class MainWindow : Window
 {
     public MainWindow()

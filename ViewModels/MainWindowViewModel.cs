@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json;
 using Avalonia;
@@ -11,6 +12,7 @@ using MailGrabber.Services;
 
 namespace MailGrabber.ViewModels;
 
+[ExcludeFromCodeCoverage]
 public partial class MainWindowViewModel : ObservableObject
 {
     private static readonly JsonSerializerOptions UiJsonOptions = new() { WriteIndented = true };

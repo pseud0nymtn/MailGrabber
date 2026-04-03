@@ -1,9 +1,11 @@
 ﻿using Avalonia;
 using MailGrabber.Views;
 using MailGrabber.Services;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MailGrabber;
 
+[ExcludeFromCodeCoverage]
 internal static class Program
 {
 	private static async Task<int> Main(string[] args)

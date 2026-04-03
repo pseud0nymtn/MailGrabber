@@ -31,4 +31,10 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="MailGrabber.Tests/**" />
+    <EmbeddedResource Remove="MailGrabber.Tests/**" />
+    <None Remove="MailGrabber.Tests/**" />
+  </ItemGroup>
+
 </Project>

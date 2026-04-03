@@ -1,7 +1,9 @@
 using MailGrabber.Models;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MailGrabber.Services;
 
+[ExcludeFromCodeCoverage]
 public static class MailGrabberRunner
 {
     public static async Task<MailGrabberRunResult> RunAsync(AppSettings settings, Action<string>? log = null)

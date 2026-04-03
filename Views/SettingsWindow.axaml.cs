@@ -2,9 +2,11 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using MailGrabber.ViewModels;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MailGrabber.Views;
 
+[ExcludeFromCodeCoverage]
 public partial class SettingsWindow : Window
 {
     public SettingsWindow()
