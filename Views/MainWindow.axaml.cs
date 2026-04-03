@@ -34,10 +34,13 @@ public partial class MainWindow : Window
             var current = mainVmCurrent.GetCurrentSettings();
             settingsViewModel.EnableOutlook = current.EnableOutlook;
             settingsViewModel.EnableGmail = current.EnableGmail;
+            settingsViewModel.EnableNewsletterClustering = current.EnableNewsletterClustering;
             settingsViewModel.MaxMessages = current.MaxMessages;
+            settingsViewModel.ConfigPath = current.ConfigPath;
             settingsViewModel.OutputPath = current.OutputPath;
             settingsViewModel.JsonOutputPath = current.JsonOutputPath;
             settingsViewModel.HtmlOutputPath = current.HtmlOutputPath;
+            settingsViewModel.BaseSettings = mainVmCurrent.LastLoadedSettings;
         }
 
         var settingsWindow = new SettingsWindow { DataContext = settingsViewModel };
@@ -63,6 +66,8 @@ public partial class MainWindow : Window
                 settingsViewModel.EnableOutlook,
                 settingsViewModel.EnableGmail,
                 settingsViewModel.MaxMessages,
+                settingsViewModel.EnableNewsletterClustering,
+                settingsViewModel.ConfigPath,
                 settingsViewModel.OutputPath,
                 settingsViewModel.JsonOutputPath,
                 settingsViewModel.HtmlOutputPath

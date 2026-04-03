@@ -15,34 +15,26 @@
     <!-- Header -->
     <TextBlock Classes="headline" Text="MailGrabber Sender Cluster Studio" />
 
-    <!-- Control Row -->
-    <Border Grid.Row="1" Classes="card">
-      <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="10">
-        <TextBox Grid.Column="0"
-                 Watermark="Path to appsettings.json"
-                 Text="{Binding ConfigPath}" />
+        <!-- Control Row -->
+        <Border Grid.Row="1" Classes="card">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+      <Button MinWidth="120"
+        Command="{Binding RunCommand}"
+        Content="Run Analysis" />
 
-        <Button Grid.Column="1"
-                MinWidth="120"
-                Command="{Binding RunCommand}"
-                Content="Run Analysis" />
+      <Button MinWidth="120"
+        Command="{Binding OpenHtmlViewerCommand}"
+        Content="Open Viewer" />
 
-        <Button Grid.Column="2"
-                MinWidth="120"
-                Command="{Binding OpenHtmlViewerCommand}"
-                Content="Open Viewer" />
+      <Button MinWidth="130"
+        Command="{Binding OpenOutputFolderCommand}"
+        Content="Open Output Folder" />
 
-        <Button Grid.Column="3"
-                MinWidth="130"
-                Command="{Binding OpenOutputFolderCommand}"
-                Content="Open Output Folder" />
-
-        <Button Grid.Column="4"
-                x:Name="SettingsButton"
-                MinWidth="90"
-                Content="Settings" />
-      </Grid>
-    </Border>
+      <Button x:Name="SettingsButton"
+        MinWidth="90"
+        Content="Settings" />
+          </StackPanel>
+        </Border>
 
     <!-- Search Row -->
     <Border Grid.Row="2" Classes="card">

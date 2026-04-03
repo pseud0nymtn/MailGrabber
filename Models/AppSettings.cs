@@ -42,6 +42,8 @@ public sealed class AppSettings
 
     public int PageSize { get; set; } = 50;
 
+    public bool EnableNewsletterClustering { get; set; } = true;
+
     public string NewsletterClusterName { get; set; } = "newsletter";
 
     public List<string> NewsletterMailboxHints { get; set; } =

@@ -25,10 +25,12 @@ public sealed class MainWindowViewModel : ViewModelBase
     private ClusterReport? _fullReport;
     private bool _enableOutlookOverride = true;
     private bool _enableGmailOverride = false;
+    private bool _enableNewsletterClusteringOverride = true;
     private int _maxMessagesOverride = 2000;
     private string _outputPathOverride = "output/sender-clusters.csv";
     private string _jsonOutputPathOverride = "output/sender-clusters.json";
     private string _htmlOutputPathOverride = "output/cluster-viewer.html";
+    private AppSettings? _lastLoadedSettings;
 
     public MainWindowViewModel()
     {
@@ -57,11 +59,13 @@ public sealed class MainWindowViewModel : ViewModelBase
             var settings = ConfigurationLoader.Load(args);
             _enableOutlookOverride = settings.EnableOutlook;
             _enableGmailOverride = settings.EnableGmail;
+            _enableNewsletterClusteringOverride = settings.EnableNewsletterClustering;
             _maxMessagesOverride = settings.MaxMessages;
             _outputPathOverride = settings.OutputPath;
             _jsonOutputPathOverride = settings.JsonOutputPath;
             _htmlOutputPathOverride = settings.HtmlOutputPath;
             _lastHtmlOutputPath = settings.HtmlOutputPath;
+            _lastLoadedSettings = settings;
         }
         catch
         {
@@ -69,12 +73,14 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
-    public (bool EnableOutlook, bool EnableGmail, int MaxMessages,
-            string OutputPath, string JsonOutputPath, string HtmlOutputPath) GetCurrentSettings()
-    {
-        return (_enableOutlookOverride, _enableGmailOverride, _maxMessagesOverride,
-                _outputPathOverride, _jsonOutputPathOverride, _htmlOutputPathOverride);
-    }
+        public (bool EnableOutlook, bool EnableGmail, int MaxMessages, bool EnableNewsletterClustering,
+            string ConfigPath, string OutputPath, string JsonOutputPath, string HtmlOutputPath) GetCurrentSettings()
+        {
+        return (_enableOutlookOverride, _enableGmailOverride, _maxMessagesOverride, _enableNewsletterClusteringOverride,
+            _configPath, _outputPathOverride, _jsonOutputPathOverride, _htmlOutputPathOverride);
+        }
+
+        public AppSettings? LastLoadedSettings => _lastLoadedSettings;
 
     public string ConfigPath
     {
@@ -151,17 +157,19 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public ICommand ClearFilterCommand { get; }
 
-    public void ApplySettings(bool enableOutlook, bool enableGmail, int maxMessages, string outputPath, string jsonOutputPath, string htmlOutputPath)
+    public void ApplySettings(bool enableOutlook, bool enableGmail, int maxMessages,
+        bool enableNewsletterClustering, string configPath,
+        string outputPath, string jsonOutputPath, string htmlOutputPath)
     {
         _enableOutlookOverride = enableOutlook;
         _enableGmailOverride = enableGmail;
         _maxMessagesOverride = maxMessages;
+        _enableNewsletterClusteringOverride = enableNewsletterClustering;
+        ConfigPath = configPath;
         _outputPathOverride = outputPath;
         _jsonOutputPathOverride = jsonOutputPath;
         _htmlOutputPathOverride = htmlOutputPath;
-
         _lastHtmlOutputPath = htmlOutputPath;
-
         StatusMessage = "Settings updated.";
     }
 
@@ -179,6 +187,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
             settings.EnableOutlook = _enableOutlookOverride;
             settings.EnableGmail = _enableGmailOverride;
+            settings.EnableNewsletterClustering = _enableNewsletterClusteringOverride;
             settings.MaxMessages = _maxMessagesOverride;
             settings.OutputPath = _outputPathOverride;
             settings.JsonOutputPath = _jsonOutputPathOverride;

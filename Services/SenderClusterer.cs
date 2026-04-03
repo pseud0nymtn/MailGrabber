@@ -19,7 +19,7 @@ public static class SenderClusterer
             var senderName = message.SenderName?.Trim() ?? string.Empty;
             var domain = ExtractDomain(address);
             var tld = ExtractTld(domain);
-            var isNewsletter = IsNewsletter(address, senderName, domain, settings);
+            var isNewsletter = settings.EnableNewsletterClustering && IsNewsletter(address, senderName, domain, settings);
             var cluster = isNewsletter ? settings.NewsletterClusterName : domain ?? "unknown";
 
             if (!senders.TryGetValue(address, out var accumulator))
