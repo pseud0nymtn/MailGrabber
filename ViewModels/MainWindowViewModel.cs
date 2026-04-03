@@ -263,6 +263,12 @@ public partial class MainWindowViewModel : ObservableObject
         }
         
         ApplyFiltersAndSearch();
+
+        // If showing senders from all marked clusters, refresh the sender list
+        if (ShowSendersFromAllMarkedClusters)
+        {
+            RefreshSenderRows();
+        }
     }
 
     private void UpdateMarkedClusterCount()
