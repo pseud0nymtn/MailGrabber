@@ -17,23 +17,36 @@
 
         <!-- Control Row -->
         <Border Grid.Row="1" Classes="card">
-          <StackPanel Orientation="Horizontal" Spacing="10">
-      <Button MinWidth="120"
-        Command="{Binding RunCommand}"
-        Content="Run Analysis" />
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+              <Button MinWidth="120"
+                      Command="{Binding RunCommand}"
+                      Content="Run Analysis" />
 
-      <Button MinWidth="120"
-        Command="{Binding OpenHtmlViewerCommand}"
-        Content="Open Viewer" />
+              <Button MinWidth="120"
+                      Command="{Binding OpenHtmlViewerCommand}"
+                      Content="Open Viewer" />
 
-      <Button MinWidth="130"
-        Command="{Binding OpenOutputFolderCommand}"
-        Content="Open Output Folder" />
+              <Button MinWidth="130"
+                      Command="{Binding OpenOutputFolderCommand}"
+                      Content="Open Output Folder" />
 
-      <Button x:Name="SettingsButton"
-        MinWidth="90"
-        Content="Settings" />
-          </StackPanel>
+              <Button x:Name="SettingsButton"
+                      MinWidth="90"
+                      Content="Settings" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="1"
+                        Orientation="Horizontal"
+                        Spacing="8"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center">
+              <TextBlock VerticalAlignment="Center" Text="Schema" Opacity="0.8" />
+              <ComboBox MinWidth="130"
+                        ItemsSource="{Binding ThemeModeOptions}"
+                        SelectedItem="{Binding SelectedThemeMode}" />
+            </StackPanel>
+          </Grid>
         </Border>
 
     <!-- Search Row -->
@@ -68,7 +81,7 @@
                        Opacity="0.75"
                        FontSize="12"
                        Text="{Binding MarkedClusterCount, StringFormat='({0} marked)'}" />
-            <Separator Width="1" Background="#33A0A0A0" />
+            <Separator Width="1" Opacity="0.28" />
             <ToggleSwitch HorizontalAlignment="Left"
                           Content="Sort alphabetically"
                           IsChecked="{Binding SortClustersAlphabetically}" />
@@ -117,15 +130,15 @@
           <ListBox Grid.Row="2" ItemsSource="{Binding SenderRows}">
             <ListBox.ItemTemplate>
               <DataTemplate x:DataType="vm:SenderRowViewModel">
-                <Border Margin="0,0,0,6" Padding="10" Background="#1FFFFFFF" CornerRadius="8">
+                <Border Margin="0,0,0,6" Padding="10" Classes="senderRow">
                   <Grid ColumnDefinitions="2.5*,1.1*,0.8*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="8" RowSpacing="4">
                     <TextBlock Grid.Column="0" Text="{Binding SenderAddress}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                     <TextBlock Grid.Column="1" Text="{Binding Domain}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Grid.Column="2" Text="{Binding MessageCount}" HorizontalAlignment="Right" />
 
                     <TextBlock Grid.Row="1" Grid.ColumnSpan="3" Text="{Binding SenderName}" Opacity="0.85" TextTrimming="CharacterEllipsis" />
-                    <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="{Binding Providers}" Opacity="0.8" Foreground="#FF666666" FontSize="11" />
-                    <TextBlock Grid.Row="3" Grid.ColumnSpan="3" Text="{Binding SampleSubjects}" Opacity="0.7" TextWrapping="Wrap" FontSize="11" Foreground="#FF999999" />
+                    <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="{Binding Providers}" Opacity="0.8" FontSize="11" />
+                    <TextBlock Grid.Row="3" Grid.ColumnSpan="3" Text="{Binding SampleSubjects}" Opacity="0.7" TextWrapping="Wrap" FontSize="11" />
                   </Grid>
                 </Border>
               </DataTemplate>

@@ -1,6 +1,9 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text;
+using System.Text.Json;
+using Avalonia;
+using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MailGrabber.Models;
@@ -10,6 +13,12 @@ namespace MailGrabber.ViewModels;
 
 public partial class MainWindowViewModel : ObservableObject
 {
+    private static readonly JsonSerializerOptions UiJsonOptions = new() { WriteIndented = true };
+    private static readonly string UiSettingsPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "MailGrabber",
+        "ui-settings.json");
+
     private string _lastHtmlOutputPath = "output/cluster-viewer.html";
     private ClusterReport? _fullReport;
     private bool _enableOutlookOverride = true;
@@ -57,6 +66,9 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private bool sortClustersAlphabetically;
 
+    [ObservableProperty]
+    private string selectedThemeMode = "System";
+
     public MainWindowViewModel()
     {
         Clusters = new ObservableCollection<ClusterBucketViewModel>();
@@ -69,7 +81,11 @@ public partial class MainWindowViewModel : ObservableObject
         OpenOutputFolderCommand = new RelayCommand(OpenOutputFolder);
         ClearFilterCommand = new RelayCommand(ClearFilter);
 
+        ThemeModeOptions = ["System", "Hell", "Dunkel"];
+
         LoadSettingsFromConfig();
+        LoadUiSettings();
+        ApplyThemeMode(SelectedThemeMode);
     }
 
     public ObservableCollection<ClusterBucketViewModel> Clusters { get; }
@@ -87,6 +103,8 @@ public partial class MainWindowViewModel : ObservableObject
     public IRelayCommand OpenOutputFolderCommand { get; }
 
     public IRelayCommand ClearFilterCommand { get; }
+
+    public IReadOnlyList<string> ThemeModeOptions { get; }
 
     public AppSettings? LastLoadedSettings => _lastLoadedSettings;
 
@@ -125,6 +143,12 @@ public partial class MainWindowViewModel : ObservableObject
     {
         RefreshFilterClusters();
         ApplyFiltersAndSearch();
+    }
+
+    partial void OnSelectedThemeModeChanged(string value)
+    {
+        ApplyThemeMode(value);
+        SaveUiSettings();
     }
 
     partial void OnSelectedFilterClusterChanged(SelectableClusterViewModel? value)
@@ -428,6 +452,94 @@ public partial class MainWindowViewModel : ObservableObject
         UpdateMarkedClusterCount();
         RefreshFilterClusters();
         ApplyFiltersAndSearch();
+    }
+
+    private static void ApplyThemeMode(string? mode)
+    {
+        if (Application.Current is null)
+        {
+            return;
+        }
+
+        Application.Current.RequestedThemeVariant = mode switch
+        {
+            "Hell" => ThemeVariant.Light,
+            "Dunkel" => ThemeVariant.Dark,
+            _ => ThemeVariant.Default
+        };
+    }
+
+    private void LoadUiSettings()
+    {
+        try
+        {
+            if (!File.Exists(UiSettingsPath))
+            {
+                return;
+            }
+
+            var json = File.ReadAllText(UiSettingsPath);
+            var uiSettings = JsonSerializer.Deserialize<UiSettings>(json, UiJsonOptions);
+            if (uiSettings is null)
+            {
+                return;
+            }
+
+            var loadedMode = NormalizeThemeMode(uiSettings.ThemeMode);
+            if (!string.IsNullOrWhiteSpace(loadedMode))
+            {
+                SelectedThemeMode = loadedMode;
+            }
+        }
+        catch
+        {
+            // Ignore corrupted UI settings and continue with defaults.
+        }
+    }
+
+    private void SaveUiSettings()
+    {
+        try
+        {
+            var directory = Path.GetDirectoryName(UiSettingsPath);
+            if (!string.IsNullOrWhiteSpace(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            var payload = new UiSettings
+            {
+                ThemeMode = NormalizeThemeMode(SelectedThemeMode) ?? "System"
+            };
+
+            var json = JsonSerializer.Serialize(payload, UiJsonOptions);
+            File.WriteAllText(UiSettingsPath, json);
+        }
+        catch
+        {
+            // Saving UI preferences is optional; ignore IO failures.
+        }
+    }
+
+    private static string? NormalizeThemeMode(string? mode)
+    {
+        if (string.IsNullOrWhiteSpace(mode))
+        {
+            return null;
+        }
+
+        return mode.Trim().ToLowerInvariant() switch
+        {
+            "hell" or "light" => "Hell",
+            "dunkel" or "dark" => "Dunkel",
+            "system" or "default" => "System",
+            _ => null
+        };
+    }
+
+    private sealed class UiSettings
+    {
+        public string ThemeMode { get; set; } = "System";
     }
 
     private void AppendLog(string message)
