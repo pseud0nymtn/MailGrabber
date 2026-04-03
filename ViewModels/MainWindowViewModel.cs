@@ -103,6 +103,21 @@ public partial class MainWindowViewModel : ObservableObject
         ApplyFiltersAndSearch();
     }
 
+    partial void OnSelectedFilterClusterChanged(SelectableClusterViewModel? value)
+    {
+        if (value is null)
+        {
+            return;
+        }
+
+        // Find the corresponding cluster in Clusters and select it
+        var targetCluster = Clusters.FirstOrDefault(c => c.Cluster.Equals(value.Cluster, StringComparison.OrdinalIgnoreCase));
+        if (targetCluster is not null)
+        {
+            SelectedCluster = targetCluster;
+        }
+    }
+
     public (bool EnableOutlook, bool EnableGmail, int MaxMessages, bool EnableNewsletterClustering,
         string ConfigPath, string OutputPath, string JsonOutputPath, string HtmlOutputPath) GetCurrentSettings()
     {
@@ -216,7 +231,13 @@ public partial class MainWindowViewModel : ObservableObject
     private void OnClusterSelectionChanged()
     {
         UpdateMarkedClusterCount();
-        RefreshFilterClusters();
+        
+        // Only refresh the filter list if "Show only marked" is active
+        if (ShowOnlyMarkedClusters)
+        {
+            RefreshFilterClusters();
+        }
+        
         ApplyFiltersAndSearch();
     }
 
