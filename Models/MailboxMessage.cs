@@ -1,16 +1,24 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace MailGrabber.Models;
 
-public sealed class MailboxMessage
+public partial class MailboxMessage : ObservableObject
 {
-    public required string Provider { get; init; }
+    [ObservableProperty]
+    private string provider = string.Empty;
 
-    public required string AccountLabel { get; init; }
+    [ObservableProperty]
+    private string accountLabel = string.Empty;
 
-    public string? SenderAddress { get; init; }
+    [ObservableProperty]
+    private string? senderAddress;
 
-    public string? SenderName { get; init; }
+    [ObservableProperty]
+    private string? senderName;
 
-    public string? Subject { get; init; }
+    [ObservableProperty]
+    private string? subject;
 
-    public DateTimeOffset? ReceivedDateTime { get; init; }
+    [ObservableProperty]
+    private DateTimeOffset? receivedDateTime;
 }

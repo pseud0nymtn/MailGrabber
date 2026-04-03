@@ -1,50 +1,77 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace MailGrabber.Models;
 
-public sealed class AppSettings
+public partial class AppSettings : ObservableObject
 {
-    public bool EnableOutlook { get; set; } = true;
+    [ObservableProperty]
+    private bool enableOutlook = true;
 
-    public string OutlookAccountLabel { get; set; } = "Outlook";
+    [ObservableProperty]
+    private string outlookAccountLabel = "Outlook";
 
-    public string ClientId { get; set; } = "YOUR-CLIENT-ID-HERE";
+    [ObservableProperty]
+    private string clientId = "YOUR-CLIENT-ID-HERE";
 
-    public string TenantId { get; set; } = "consumers";
+    [ObservableProperty]
+    private string tenantId = "consumers";
 
-    public bool EnableGmail { get; set; } = false;
+    [ObservableProperty]
+    private bool enableGmail;
 
-    public string GmailAccountLabel { get; set; } = "Gmail";
+    [ObservableProperty]
+    private string gmailAccountLabel = "Gmail";
 
-    public string GmailClientSecretsPath { get; set; } = "google-client-secret.json";
+    [ObservableProperty]
+    private string gmailClientSecretsPath = "google-client-secret.json";
 
-    public string GmailTokenDirectory { get; set; } = string.Empty;
+    [ObservableProperty]
+    private string gmailTokenDirectory = string.Empty;
 
-    public string GmailUserId { get; set; } = "me";
+    [ObservableProperty]
+    private string gmailUserId = "me";
 
-    public string OutputPath { get; set; } = "output/sender-clusters.csv";
+    [ObservableProperty]
+    private string outputPath = "output/sender-clusters.csv";
 
-    public string JsonOutputPath { get; set; } = "output/sender-clusters.json";
+    [ObservableProperty]
+    private string jsonOutputPath = "output/sender-clusters.json";
 
-    public string HtmlOutputPath { get; set; } = "output/cluster-viewer.html";
+    [ObservableProperty]
+    private string htmlOutputPath = "output/cluster-viewer.html";
 
-    public bool WriteCsv { get; set; } = true;
+    [ObservableProperty]
+    private bool writeCsv = true;
 
-    public bool WriteJson { get; set; } = true;
+    [ObservableProperty]
+    private bool writeJson = true;
 
-    public bool WriteHtmlViewer { get; set; } = true;
+    [ObservableProperty]
+    private bool writeHtmlViewer = true;
 
-    public string AuthenticationRecordPath { get; set; } = string.Empty;
+    [ObservableProperty]
+    private string authenticationRecordPath = string.Empty;
 
-    public string TokenCacheName { get; set; } = "MailGrabberTokenCache";
+    [ObservableProperty]
+    private string tokenCacheName = "MailGrabberTokenCache";
 
-    public bool AllowUnencryptedTokenCache { get; set; } = true;
+    [ObservableProperty]
+    private bool allowUnencryptedTokenCache = true;
 
-    public int MaxMessages { get; set; } = 2000;
+    [ObservableProperty]
+    private int maxMessages = 2000;
 
-    public int PageSize { get; set; } = 50;
+    [ObservableProperty]
+    private int pageSize = 50;
 
-    public string NewsletterClusterName { get; set; } = "newsletter";
+    [ObservableProperty]
+    private bool enableNewsletterClustering = true;
 
-    public List<string> NewsletterMailboxHints { get; set; } =
+    [ObservableProperty]
+    private string newsletterClusterName = "newsletter";
+
+    [ObservableProperty]
+    private List<string> newsletterMailboxHints =
     [
         "newsletter",
         "news",
@@ -69,7 +96,8 @@ public sealed class AppSettings
         "service"
     ];
 
-    public List<string> NewsletterDomainHints { get; set; } =
+    [ObservableProperty]
+    private List<string> newsletterDomainHints =
     [
         "mailchimp",
         "sendgrid",

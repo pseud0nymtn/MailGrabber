@@ -17,14 +17,15 @@ public static class SenderClusterer
             }
 
             var senderName = message.SenderName?.Trim() ?? string.Empty;
-            var domain = ExtractDomain(address);
-            var tld = ExtractTld(domain);
-            var isNewsletter = IsNewsletter(address, senderName, domain, settings);
-            var cluster = isNewsletter ? settings.NewsletterClusterName : domain ?? "unknown";
+            var rawDomain = ExtractRawDomain(address);
+            var domain = PublicSuffixHelper.GetRegistrableDomain(rawDomain) ?? rawDomain ?? "unknown";
+            var tld = PublicSuffixHelper.GetTld(rawDomain);
+            var isNewsletter = settings.EnableNewsletterClustering && IsNewsletter(address, senderName, domain, settings);
+            var cluster = isNewsletter ? settings.NewsletterClusterName : domain;
 
             if (!senders.TryGetValue(address, out var accumulator))
             {
-                accumulator = new SenderAccumulator(cluster, tld ?? "unknown", domain ?? "unknown", address, senderName, isNewsletter);
+                accumulator = new SenderAccumulator(cluster, tld ?? "unknown", domain, address, senderName, isNewsletter);
                 senders.Add(address, accumulator);
             }
 
@@ -52,7 +53,8 @@ public static class SenderClusterer
         return normalized.Contains('@') ? normalized : null;
     }
 
-    private static string? ExtractDomain(string address)
+    /// <summary>Extracts the raw host part after '@' without any normalization.</summary>
+    private static string? ExtractRawDomain(string address)
     {
         var atIndex = address.LastIndexOf('@');
         if (atIndex < 0 || atIndex == address.Length - 1)
@@ -61,17 +63,6 @@ public static class SenderClusterer
         }
 
         return address[(atIndex + 1)..].Trim('.');
-    }
-
-    private static string? ExtractTld(string? domain)
-    {
-        if (string.IsNullOrWhiteSpace(domain))
-        {
-            return null;
-        }
-
-        var labels = domain.Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        return labels.Length == 0 ? null : labels[^1].ToLowerInvariant();
     }
 
     private static bool IsNewsletter(string address, string senderName, string? domain, AppSettings settings)

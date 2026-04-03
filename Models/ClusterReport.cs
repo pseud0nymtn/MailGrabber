@@ -1,23 +1,33 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace MailGrabber.Models;
 
-public sealed class ClusterReport
+public partial class ClusterReport : ObservableObject
 {
-    public DateTimeOffset GeneratedAtUtc { get; init; }
+    [ObservableProperty]
+    private DateTimeOffset generatedAtUtc;
 
-    public int TotalInputMessages { get; init; }
+    [ObservableProperty]
+    private List<ClusterBucket> clusters = [];
 
-    public required List<ClusterBucket> Clusters { get; init; }
+    [ObservableProperty]
+    private int totalInputMessages;
 }
 
-public sealed class ClusterBucket
+public partial class ClusterBucket : ObservableObject
 {
-    public required string Cluster { get; init; }
+    [ObservableProperty]
+    private string cluster = string.Empty;
 
-    public bool IsNewsletterCluster { get; init; }
+    [ObservableProperty]
+    private bool isNewsletterCluster;
 
-    public int SenderCount { get; init; }
+    [ObservableProperty]
+    private int senderCount;
 
-    public int MessageCount { get; init; }
+    [ObservableProperty]
+    private int messageCount;
 
-    public required List<ClusteredSenderRow> SenderAddresses { get; init; }
+    [ObservableProperty]
+    private List<ClusteredSenderRow> senderAddresses = [];
 }

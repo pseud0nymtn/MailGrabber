@@ -1,5 +1,6 @@
-﻿using MailGrabber.Services;
-using MailGrabber.Models;
+﻿using Avalonia;
+using MailGrabber.Views;
+using MailGrabber.Services;
 
 namespace MailGrabber;
 
@@ -13,9 +14,18 @@ internal static class Program
 			return 0;
 		}
 
+		var runCli = args.Any(argument => argument.Equals("--cli", StringComparison.OrdinalIgnoreCase));
+		if (!runCli)
+		{
+			BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+			return 0;
+		}
+
+		var cliArguments = args.Where(argument => !argument.Equals("--cli", StringComparison.OrdinalIgnoreCase)).ToArray();
+
 		try
 		{
-			var settings = ConfigurationLoader.Load(args);
+			var settings = ConfigurationLoader.Load(cliArguments);
 			settings.Validate();
 
 			Console.WriteLine($"Outlook enabled: {settings.EnableOutlook}");
@@ -26,40 +36,10 @@ internal static class Program
 			Console.WriteLine($"Max messages: {settings.MaxMessages}");
 			Console.WriteLine();
 
-			var messages = new List<MailboxMessage>();
+			var result = await MailGrabberRunner.RunAsync(settings);
 
-			if (settings.EnableOutlook)
-			{
-				using var outlookClient = new OutlookGraphClient(settings);
-				messages.AddRange(await outlookClient.GetInboxMessagesAsync());
-			}
-
-			if (settings.EnableGmail)
-			{
-				var gmailClient = new GmailClient(settings);
-				messages.AddRange(await gmailClient.GetInboxMessagesAsync());
-			}
-
-			var rows = SenderClusterer.BuildRows(messages, settings);
-			var report = ReportBuilder.Build(rows, messages.Count);
-
-			if (settings.WriteCsv)
-			{
-				CsvExporter.Write(settings.OutputPath, rows);
-			}
-
-			if (settings.WriteJson)
-			{
-				JsonExporter.Write(settings.JsonOutputPath, report);
-			}
-
-			if (settings.WriteHtmlViewer)
-			{
-				HtmlViewerExporter.Write(settings.HtmlOutputPath, report);
-			}
-
-			Console.WriteLine($"Fetched {messages.Count} inbox messages across all enabled providers.");
-			Console.WriteLine($"Prepared {rows.Count} clustered sender rows.");
+			Console.WriteLine($"Fetched {result.TotalMessages} inbox messages across all enabled providers.");
+			Console.WriteLine($"Prepared {result.RowCount} clustered sender rows.");
 
 			if (settings.WriteCsv)
 			{
@@ -85,12 +65,20 @@ internal static class Program
 		}
 	}
 
+	public static AppBuilder BuildAvaloniaApp()
+	{
+		return AppBuilder.Configure<App>()
+			.UsePlatformDetect()
+			.LogToTrace();
+	}
+
 	private static void ShowHelp()
 	{
-		Console.WriteLine("MailGrabber - Outlook sender clustering");
+		Console.WriteLine("MailGrabber - Desktop UI and CLI sender clustering");
 		Console.WriteLine();
 		Console.WriteLine("Usage:");
-		Console.WriteLine("  dotnet run -- [--config appsettings.json] [--output output/sender-clusters.csv] [--json-output output/sender-clusters.json] [--html-output output/cluster-viewer.html]");
+		Console.WriteLine("  dotnet run --                  (starts Avalonia desktop UI)");
+		Console.WriteLine("  dotnet run -- --cli [--config appsettings.json] [--output output/sender-clusters.csv] [--json-output output/sender-clusters.json] [--html-output output/cluster-viewer.html]");
 		Console.WriteLine();
 		Console.WriteLine("Environment variable overrides:");
 		Console.WriteLine("  MAILGRABBER_ENABLE_OUTLOOK");

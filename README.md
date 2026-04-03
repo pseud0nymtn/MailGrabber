@@ -33,14 +33,22 @@ cp appsettings.example.json appsettings.json
 
 2. Edit appsettings.json and set your values.
 
-3. Run the app.
+3. Run the desktop app (Avalonia UI).
 
 ```bash
 dotnet restore
-dotnet run -- --config appsettings.json
+dotnet run --
 ```
 
-4. Open the generated viewer.
+4. In the UI, keep `appsettings.json` as config path, click `Run Analysis`, then browse clusters and sender details directly.
+
+5. Optional: run in CLI mode (for scripts/automation).
+
+```bash
+dotnet run -- --cli --config appsettings.json
+```
+
+6. Open the generated standalone viewer.
 
 - output/cluster-viewer.html
 
@@ -126,6 +134,13 @@ Default files:
 - Outlook uses Device Code flow with persistent token cache.
 - Gmail uses OAuth with local token persistence.
 - First run requires browser authentication. Later runs should usually be silent until tokens are revoked/expired.
+
+## UI Notes
+
+- The app starts in a desktop window by default.
+- `Run Analysis` executes the same pipeline as CLI mode.
+- `Open Viewer` launches the generated HTML viewer.
+- `Open Output Folder` opens the export folder in your file manager.
 
 ## Security and Safe Push Checklist
 
