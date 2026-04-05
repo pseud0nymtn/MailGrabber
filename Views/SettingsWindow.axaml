@@ -41,7 +41,15 @@
                     <StackPanel Spacing="12">
                         <TextBlock Classes="settingsSectionTitle" Text="Providers" />
                         <CheckBox Content="Enable Outlook" IsChecked="{Binding EnableOutlook}" />
+                        <Grid ColumnDefinitions="200,*" ColumnSpacing="10">
+                            <TextBlock Classes="settingsLabel" VerticalAlignment="Center" Text="Outlook Client ID:" />
+                            <TextBox Grid.Column="1" Text="{Binding ClientId}" PasswordChar="*" Watermark="68a35344-00a3-41f4-b529-799caafe9bd8" />
+                        </Grid>
                         <CheckBox Content="Enable Gmail" IsChecked="{Binding EnableGmail}" />
+                        <Grid ColumnDefinitions="200,*" ColumnSpacing="10">
+                            <TextBlock Classes="settingsLabel" VerticalAlignment="Center" Text="Google Client Secret JSON:" />
+                            <TextBox Grid.Column="1" Text="{Binding GmailClientSecretsPath}" Watermark="google-client-secret.json" />
+                        </Grid>
                     </StackPanel>
                 </Border>
 

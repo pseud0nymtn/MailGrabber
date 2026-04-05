@@ -14,6 +14,12 @@ public partial class SettingsDialogViewModel : ObservableObject
     private bool enableGmail;
 
     [ObservableProperty]
+    private string clientId = "YOUR-CLIENT-ID-HERE";
+
+    [ObservableProperty]
+    private string gmailClientSecretsPath = "google-client-secret.json";
+
+    [ObservableProperty]
     private bool enableNewsletterClustering = true;
 
     [ObservableProperty]
@@ -58,6 +64,8 @@ public partial class SettingsDialogViewModel : ObservableObject
 
         settings.EnableOutlook = EnableOutlook;
         settings.EnableGmail = EnableGmail;
+        settings.ClientId = ClientId;
+        settings.GmailClientSecretsPath = GmailClientSecretsPath;
         settings.EnableNewsletterClustering = EnableNewsletterClustering;
         settings.MaxMessages = MaxMessages;
         settings.OutputPath = OutputPath;

@@ -8,8 +8,6 @@
         mc:Ignorable="d"
         Width="1400"
         Height="900"
-        MinWidth="1000"
-        MinHeight="700"
         Title="MailGrabber - Sender Cluster Studio">
   <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Margin="18" RowSpacing="12">
     <!-- Header -->

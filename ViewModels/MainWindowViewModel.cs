@@ -27,6 +27,8 @@ public partial class MainWindowViewModel : ObservableObject
     private bool _enableGmailOverride;
     private bool _enableNewsletterClusteringOverride = true;
     private int _maxMessagesOverride = 2000;
+    private string _clientIdOverride = "YOUR-CLIENT-ID-HERE";
+    private string _gmailClientSecretsPathOverride = "google-client-secret.json";
     private string _outputPathOverride = "output/sender-clusters.csv";
     private string _jsonOutputPathOverride = "output/sender-clusters.json";
     private string _htmlOutputPathOverride = "output/cluster-viewer.html";
@@ -169,14 +171,17 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     public (bool EnableOutlook, bool EnableGmail, int MaxMessages, bool EnableNewsletterClustering,
-        string ConfigPath, string OutputPath, string JsonOutputPath, string HtmlOutputPath) GetCurrentSettings()
+        string ConfigPath, string ClientId, string GmailClientSecretsPath,
+        string OutputPath, string JsonOutputPath, string HtmlOutputPath) GetCurrentSettings()
     {
         return (_enableOutlookOverride, _enableGmailOverride, _maxMessagesOverride, _enableNewsletterClusteringOverride,
-            ConfigPath, _outputPathOverride, _jsonOutputPathOverride, _htmlOutputPathOverride);
+            ConfigPath, _clientIdOverride, _gmailClientSecretsPathOverride,
+            _outputPathOverride, _jsonOutputPathOverride, _htmlOutputPathOverride);
     }
 
     public void ApplySettings(bool enableOutlook, bool enableGmail, int maxMessages,
         bool enableNewsletterClustering, string newConfigPath,
+        string clientId, string gmailClientSecretsPath,
         string outputPath, string jsonOutputPath, string htmlOutputPath)
     {
         _enableOutlookOverride = enableOutlook;
@@ -184,6 +189,8 @@ public partial class MainWindowViewModel : ObservableObject
         _maxMessagesOverride = maxMessages;
         _enableNewsletterClusteringOverride = enableNewsletterClustering;
         ConfigPath = newConfigPath;
+        _clientIdOverride = clientId;
+        _gmailClientSecretsPathOverride = gmailClientSecretsPath;
         _outputPathOverride = outputPath;
         _jsonOutputPathOverride = jsonOutputPath;
         _htmlOutputPathOverride = htmlOutputPath;
@@ -201,6 +208,8 @@ public partial class MainWindowViewModel : ObservableObject
             _enableGmailOverride = settings.EnableGmail;
             _enableNewsletterClusteringOverride = settings.EnableNewsletterClustering;
             _maxMessagesOverride = settings.MaxMessages;
+            _clientIdOverride = settings.ClientId;
+            _gmailClientSecretsPathOverride = settings.GmailClientSecretsPath;
             _outputPathOverride = settings.OutputPath;
             _jsonOutputPathOverride = settings.JsonOutputPath;
             _htmlOutputPathOverride = settings.HtmlOutputPath;
@@ -234,6 +243,8 @@ public partial class MainWindowViewModel : ObservableObject
             settings.EnableGmail = _enableGmailOverride;
             settings.EnableNewsletterClustering = _enableNewsletterClusteringOverride;
             settings.MaxMessages = _maxMessagesOverride;
+            settings.ClientId = _clientIdOverride;
+            settings.GmailClientSecretsPath = _gmailClientSecretsPathOverride;
             settings.OutputPath = _outputPathOverride;
             settings.JsonOutputPath = _jsonOutputPathOverride;
             settings.HtmlOutputPath = _htmlOutputPathOverride;

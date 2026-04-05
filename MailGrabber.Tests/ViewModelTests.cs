@@ -115,6 +115,8 @@ public class ViewModelTests
                 },
                 EnableOutlook = false,
                 EnableGmail = true,
+                ClientId = "view-client-id",
+                GmailClientSecretsPath = "gmail-secret.json",
                 EnableNewsletterClustering = false,
                 MaxMessages = 77,
                 OutputPath = "x.csv",
@@ -130,7 +132,8 @@ public class ViewModelTests
                 Assert.That(File.Exists(path), Is.True);
                 Assert.That(written, Does.Contain("\"EnableOutlook\": false"));
                 Assert.That(written, Does.Contain("\"EnableGmail\": true"));
-                Assert.That(written, Does.Contain("\"ClientId\": \"base-client\""));
+                Assert.That(written, Does.Contain("\"ClientId\": \"view-client-id\""));
+                Assert.That(written, Does.Contain("\"GmailClientSecretsPath\": \"gmail-secret.json\""));
             });
         }
         finally
@@ -144,7 +147,7 @@ public class ViewModelTests
     {
         var vm = new MainWindowViewModel();
 
-        vm.ApplySettings(false, false, 10, true, "appsettings.json", "a.csv", "a.json", "a.html");
+        vm.ApplySettings(false, false, 10, true, "appsettings.json", "", "google-client-secret.json", "a.csv", "a.json", "a.html");
 
         Assert.That(vm.RunCommand.CanExecute(null), Is.True);
         await vm.RunCommand.ExecuteAsync(null);
@@ -281,7 +284,7 @@ public class ViewModelTests
             var whenBusy = (bool)canOpenMethod!.Invoke(vm, null)!;
 
             vm.IsBusy = false;
-            vm.ApplySettings(true, false, 1, true, "appsettings.json", "a.csv", "a.json", htmlPath);
+            vm.ApplySettings(true, false, 1, true, "appsettings.json", "", "google-client-secret.json", "a.csv", "a.json", htmlPath);
             var whenMissing = (bool)canOpenMethod.Invoke(vm, null)!;
 
             File.WriteAllText(htmlPath, "<html></html>");

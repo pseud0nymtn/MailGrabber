@@ -71,6 +71,8 @@ public partial class MainWindow : Window
             settingsViewModel.EnableNewsletterClustering = current.EnableNewsletterClustering;
             settingsViewModel.MaxMessages = current.MaxMessages;
             settingsViewModel.ConfigPath = current.ConfigPath;
+            settingsViewModel.ClientId = current.ClientId;
+            settingsViewModel.GmailClientSecretsPath = current.GmailClientSecretsPath;
             settingsViewModel.OutputPath = current.OutputPath;
             settingsViewModel.JsonOutputPath = current.JsonOutputPath;
             settingsViewModel.HtmlOutputPath = current.HtmlOutputPath;
@@ -102,6 +104,8 @@ public partial class MainWindow : Window
                 settingsViewModel.MaxMessages,
                 settingsViewModel.EnableNewsletterClustering,
                 settingsViewModel.ConfigPath,
+                settingsViewModel.ClientId,
+                settingsViewModel.GmailClientSecretsPath,
                 settingsViewModel.OutputPath,
                 settingsViewModel.JsonOutputPath,
                 settingsViewModel.HtmlOutputPath
