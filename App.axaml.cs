@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using MailGrabber.Services;
 using MailGrabber.ViewModels;
 using MailGrabber.Views;
 using System.Diagnostics.CodeAnalysis;
@@ -19,10 +20,9 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = new MainWindowViewModel()
-            };
+            var mainWindow = new MainWindow();
+            mainWindow.DataContext = new MainWindowViewModel(new MainWindowDialogService(mainWindow));
+            desktop.MainWindow = mainWindow;
         }
 
         base.OnFrameworkInitializationCompleted();

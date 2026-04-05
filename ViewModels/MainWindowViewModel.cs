@@ -33,6 +33,7 @@ public partial class MainWindowViewModel : ObservableObject
     private string _jsonOutputPathOverride = "output/sender-clusters.json";
     private string _htmlOutputPathOverride = "output/cluster-viewer.html";
     private AppSettings? _lastLoadedSettings;
+    private readonly IMainWindowDialogService _dialogService;
 
     [ObservableProperty]
     private string configPath = "appsettings.json";
@@ -74,16 +75,27 @@ public partial class MainWindowViewModel : ObservableObject
     private string selectedThemeMode = "System";
 
     public MainWindowViewModel()
+        : this(new NullMainWindowDialogService())
     {
+    }
+
+    public MainWindowViewModel(IMainWindowDialogService dialogService)
+    {
+        _dialogService = dialogService;
+
         Clusters = new ObservableCollection<ClusterBucketViewModel>();
         AllClusters = new ObservableCollection<SelectableClusterViewModel>();
         FilterClusters = new ObservableCollection<SelectableClusterViewModel>();
         SenderRows = new ObservableCollection<SenderRowViewModel>();
 
         RunCommand = new AsyncRelayCommand(RunAsync, CanRun);
+        OpenJsonCommand = new AsyncRelayCommand(OpenJsonAsync, CanUseDialogCommands);
+        ExportDomainsCommand = new AsyncRelayCommand(ExportDomainsAsync, CanExportDomains);
+        OpenSettingsCommand = new AsyncRelayCommand(OpenSettingsAsync, CanUseDialogCommands);
         OpenHtmlViewerCommand = new RelayCommand(OpenHtmlViewer, CanOpenHtmlViewer);
         OpenOutputFolderCommand = new RelayCommand(OpenOutputFolder);
         ClearFilterCommand = new RelayCommand(ClearFilter);
+        ToggleSelectedFilterClusterCommand = new RelayCommand(ToggleSelectedFilterCluster);
 
         ThemeModeOptions = ["System", "Hell", "Dunkel"];
 
@@ -102,19 +114,54 @@ public partial class MainWindowViewModel : ObservableObject
 
     public IAsyncRelayCommand RunCommand { get; }
 
+    public IAsyncRelayCommand OpenJsonCommand { get; }
+
+    public IAsyncRelayCommand ExportDomainsCommand { get; }
+
+    public IAsyncRelayCommand OpenSettingsCommand { get; }
+
     public IRelayCommand OpenHtmlViewerCommand { get; }
 
     public IRelayCommand OpenOutputFolderCommand { get; }
 
     public IRelayCommand ClearFilterCommand { get; }
 
+    public IRelayCommand ToggleSelectedFilterClusterCommand { get; }
+
     public IReadOnlyList<string> ThemeModeOptions { get; }
 
     public AppSettings? LastLoadedSettings => _lastLoadedSettings;
 
+    public void LoadReportFromJson(ClusterReport report)
+    {
+        LoadReport(report);
+        StatusMessage = $"Report geladen: {report.Clusters.Count} Cluster, {report.TotalInputMessages} Nachrichten.";
+    }
+
+    public IReadOnlyList<string> GetMarkedDomains()
+    {
+        var markedClusterNames = AllClusters
+            .Where(c => c.IsSelected)
+            .Select(c => c.Cluster)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        return _fullReport?.Clusters
+            .Where(b => markedClusterNames.Contains(b.Cluster))
+            .SelectMany(b => b.SenderAddresses)
+            .Select(s => s.Domain)
+            .Where(d => !string.IsNullOrWhiteSpace(d))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(d => d, StringComparer.OrdinalIgnoreCase)
+            .ToList()
+            ?? [];
+    }
+
     partial void OnIsBusyChanged(bool value)
     {
         RunCommand.NotifyCanExecuteChanged();
+        OpenJsonCommand.NotifyCanExecuteChanged();
+        OpenSettingsCommand.NotifyCanExecuteChanged();
+        ExportDomainsCommand.NotifyCanExecuteChanged();
         OpenHtmlViewerCommand.NotifyCanExecuteChanged();
     }
 
@@ -227,6 +274,102 @@ public partial class MainWindowViewModel : ObservableObject
         return !IsBusy;
     }
 
+    private bool CanUseDialogCommands()
+    {
+        return !IsBusy;
+    }
+
+    private bool CanExportDomains()
+    {
+        return !IsBusy && MarkedClusterCount > 0;
+    }
+
+    private async Task OpenJsonAsync()
+    {
+        try
+        {
+            var report = await _dialogService.OpenReportJsonAsync();
+            if (report is null)
+            {
+                return;
+            }
+
+            LoadReportFromJson(report);
+        }
+        catch (Exception exception)
+        {
+            StatusMessage = "Öffnen der JSON-Datei fehlgeschlagen";
+            AppendLog(exception.Message);
+        }
+    }
+
+    private async Task ExportDomainsAsync()
+    {
+        var domains = GetMarkedDomains();
+        if (domains.Count == 0)
+        {
+            StatusMessage = "Keine markierten Domains zum Exportieren.";
+            return;
+        }
+
+        try
+        {
+            var exported = await _dialogService.ExportDomainsAsync(domains);
+            if (exported)
+            {
+                StatusMessage = $"{domains.Count} Domains exportiert.";
+            }
+        }
+        catch (Exception exception)
+        {
+            StatusMessage = "Domain-Export fehlgeschlagen";
+            AppendLog(exception.Message);
+        }
+    }
+
+    private async Task OpenSettingsAsync()
+    {
+        var current = new MainWindowSettingsState
+        {
+            EnableOutlook = _enableOutlookOverride,
+            EnableGmail = _enableGmailOverride,
+            MaxMessages = _maxMessagesOverride,
+            EnableNewsletterClustering = _enableNewsletterClusteringOverride,
+            ConfigPath = ConfigPath,
+            ClientId = _clientIdOverride,
+            GmailClientSecretsPath = _gmailClientSecretsPathOverride,
+            OutputPath = _outputPathOverride,
+            JsonOutputPath = _jsonOutputPathOverride,
+            HtmlOutputPath = _htmlOutputPathOverride
+        };
+
+        try
+        {
+            var updated = await _dialogService.OpenSettingsDialogAsync(current, _lastLoadedSettings);
+            if (updated is null)
+            {
+                return;
+            }
+
+            ApplySettings(
+                updated.EnableOutlook,
+                updated.EnableGmail,
+                updated.MaxMessages,
+                updated.EnableNewsletterClustering,
+                updated.ConfigPath,
+                updated.ClientId,
+                updated.GmailClientSecretsPath,
+                updated.OutputPath,
+                updated.JsonOutputPath,
+                updated.HtmlOutputPath);
+        }
+        catch (Exception exception)
+        {
+            StatusMessage = "Öffnen der Einstellungen fehlgeschlagen";
+            AppendLog(exception.Message);
+        }
+    }
+
     private async Task RunAsync()
     {
         IsBusy = true;
@@ -311,6 +454,7 @@ public partial class MainWindowViewModel : ObservableObject
     private void UpdateMarkedClusterCount()
     {
         MarkedClusterCount = AllClusters.Count(c => c.IsSelected);
+        ExportDomainsCommand.NotifyCanExecuteChanged();
     }
 
     private void RefreshFilterClusters()
@@ -467,6 +611,16 @@ public partial class MainWindowViewModel : ObservableObject
         ApplyFiltersAndSearch();
     }
 
+    private void ToggleSelectedFilterCluster()
+    {
+        if (SelectedFilterCluster is null)
+        {
+            return;
+        }
+
+        SelectedFilterCluster.IsSelected = !SelectedFilterCluster.IsSelected;
+    }
+
     private static void ApplyThemeMode(string? mode)
     {
         if (Application.Current is null)
@@ -618,6 +772,16 @@ public partial class MainWindowViewModel : ObservableObject
 
         return ["--config", configPath.Trim()];
     }
+}
+
+internal sealed class NullMainWindowDialogService : IMainWindowDialogService
+{
+    public Task<ClusterReport?> OpenReportJsonAsync() => Task.FromResult<ClusterReport?>(null);
+
+    public Task<bool> ExportDomainsAsync(IReadOnlyList<string> domains) => Task.FromResult(false);
+
+    public Task<MainWindowSettingsState?> OpenSettingsDialogAsync(MainWindowSettingsState current, AppSettings? baseSettings)
+        => Task.FromResult<MainWindowSettingsState?>(null);
 }
 
 public partial class ClusterBucketViewModel : ObservableObject

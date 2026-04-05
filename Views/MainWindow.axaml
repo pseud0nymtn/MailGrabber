@@ -21,6 +21,11 @@
                       Command="{Binding RunCommand}"
                       Content="Run Analysis" />
 
+                    <Button
+                      MinWidth="130"
+                      Command="{Binding OpenJsonCommand}"
+                      Content="Open JSON..." />
+
               <Button MinWidth="120"
                       Command="{Binding OpenHtmlViewerCommand}"
                       Content="Open Viewer" />
@@ -29,8 +34,9 @@
                       Command="{Binding OpenOutputFolderCommand}"
                       Content="Open Output Folder" />
 
-              <Button x:Name="SettingsButton"
+                    <Button
                       MinWidth="90"
+                      Command="{Binding OpenSettingsCommand}"
                       Content="Settings" />
             </StackPanel>
 
@@ -79,6 +85,12 @@
                        Opacity="0.75"
                        FontSize="12"
                        Text="{Binding MarkedClusterCount, StringFormat='({0} marked)'}" />
+                <Button
+                    MinWidth="130"
+                    FontSize="12"
+                    Padding="8,4"
+                  Command="{Binding ExportDomainsCommand}"
+                    Content="Export Domains..." />
             <Separator Width="1" Opacity="0.28" />
             <ToggleSwitch HorizontalAlignment="Left"
                           Content="Sort alphabetically"
@@ -91,6 +103,9 @@
                    SelectionMode="Single"
                    SelectedItem="{Binding SelectedFilterCluster}"
                    Background="Transparent">
+            <ListBox.KeyBindings>
+              <KeyBinding Gesture="Space" Command="{Binding ToggleSelectedFilterClusterCommand}" />
+            </ListBox.KeyBindings>
             <ListBox.ItemTemplate>
               <DataTemplate x:DataType="vm:SelectableClusterViewModel">
                 <Grid Margin="0,2" ColumnDefinitions="Auto,*" ColumnSpacing="8">
