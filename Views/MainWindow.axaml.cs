@@ -10,15 +10,5 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
     }
-
-    private void OnRunLogTextChanged(object? sender, TextChangedEventArgs e)
-    {
-        if (sender is not TextBox textBox)
-        {
-            return;
-        }
-
-        textBox.CaretIndex = textBox.Text?.Length ?? 0;
-    }
 }
 

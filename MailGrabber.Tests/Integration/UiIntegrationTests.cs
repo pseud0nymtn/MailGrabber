@@ -2,6 +2,7 @@ using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
+using MailGrabber.Behaviors;
 using MailGrabber.ViewModels;
 using MailGrabber.Views;
 
@@ -41,24 +42,19 @@ public class UiIntegrationTests
     }
 
     [Test]
-    public void MainWindow_OnRunLogTextChanged_MovesCaretToEnd()
+    public void TextBoxBehaviors_AutoScrollToEnd_MovesCaretWhenTextChanges()
     {
-        var window = new MainWindow();
-        var method = typeof(MainWindow).GetMethod("OnRunLogTextChanged", BindingFlags.NonPublic | BindingFlags.Instance);
-        Assert.That(method, Is.Not.Null);
-
-        var textBox = new TextBox { Text = "line1\nline2" };
-        method!.Invoke(window, [textBox, null]);
+        var textBox = new TextBox();
+        TextBoxBehaviors.SetAutoScrollToEnd(textBox, true);
+        textBox.Text = "line1\nline2";
 
         Assert.That(textBox.CaretIndex, Is.EqualTo(textBox.Text!.Length));
     }
 
     [Test]
-    public void MainWindow_OnClusterFilterListKeyDown_HandlesSpaceForSelectedCluster()
+    public void MainWindowViewModel_ToggleSelectedFilterClusterCommand_TogglesSelection()
     {
-        var window = new MainWindow();
         var vm = new MainWindowViewModel();
-        window.DataContext = vm;
 
         var bucket = new Models.ClusterBucket
         {
@@ -69,22 +65,11 @@ public class UiIntegrationTests
 
         var selected = new SelectableClusterViewModel(bucket, () => { });
         vm.SelectedFilterCluster = selected;
-
-        var method = typeof(MainWindow).GetMethod("OnClusterFilterListKeyDown", BindingFlags.NonPublic | BindingFlags.Instance);
-        Assert.That(method, Is.Not.Null);
-
-        var args = new Avalonia.Input.KeyEventArgs
-        {
-            RoutedEvent = Avalonia.Input.InputElement.KeyDownEvent,
-            Key = Avalonia.Input.Key.Space
-        };
-
-        method!.Invoke(window, [null, args]);
+        vm.ToggleSelectedFilterClusterCommand.Execute(null);
 
         Assert.Multiple(() =>
         {
             Assert.That(selected.IsSelected, Is.True);
-            Assert.That(args.Handled, Is.True);
         });
     }
 
