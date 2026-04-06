@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.thomasn.MailGrabber</id>
+  <name>MailGrabber</name>
+  <summary>Cluster and review mailbox senders from Outlook and Gmail</summary>
+  <description>
+    <p>MailGrabber reads inbox metadata from Outlook and optional Gmail accounts, clusters senders by domain, and exports CSV, JSON, and a standalone HTML viewer.</p>
+  </description>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <launchable type="desktop-id">io.github.thomasn.MailGrabber.desktop</launchable>
+  <releases>
+    <release version="1.0.0" date="2026-04-06"/>
+  </releases>
+  <content_rating type="oars-1.1"/>
+</component>

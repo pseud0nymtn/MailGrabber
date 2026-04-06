@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:MailGrabber.ViewModels"
     Title="Settings"
+    Icon="/Assets/mailgrabber-icon.ico"
     Width="560"
     SizeToContent="Height"
     x:DataType="vm:SettingsDialogViewModel"
