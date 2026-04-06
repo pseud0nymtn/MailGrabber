@@ -9,7 +9,8 @@
         mc:Ignorable="d"
         Width="1400"
         Height="900"
-        Title="MailGrabber - Sender Cluster Studio">
+        Title="MailGrabber - Sender Cluster Studio"
+        Icon="/Assets/mailgrabber-icon.ico">
   <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Margin="18" RowSpacing="12">
     <!-- Header -->
     <TextBlock Classes="headline" Text="MailGrabber Sender Cluster Studio" />

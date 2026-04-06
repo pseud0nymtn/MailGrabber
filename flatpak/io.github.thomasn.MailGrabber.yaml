@@ -1,0 +1,31 @@
+app-id: io.github.thomasn.MailGrabber
+branch: stable
+runtime: org.freedesktop.Platform
+runtime-version: "24.08"
+sdk: org.freedesktop.Sdk
+command: mailgrabber
+finish-args:
+  - --share=network
+  - --share=ipc
+  - --socket=wayland
+  - --socket=x11
+  - --socket=fallback-x11
+  - --device=dri
+  - --filesystem=home
+  - --filesystem=/run/user:ro
+  - --talk-name=org.freedesktop.portal.Desktop
+  - --talk-name=org.freedesktop.FileManager1
+
+modules:
+  - name: mailgrabber
+    buildsystem: simple
+    build-commands:
+      - install -d /app/lib/mailgrabber /app/bin /app/share/applications /app/share/metainfo /app/share/icons/hicolor/scalable/apps
+      - cp -a published/. /app/lib/mailgrabber/
+      - install -Dm755 assets/mailgrabber-launcher.sh /app/bin/mailgrabber
+      - install -Dm644 assets/io.github.thomasn.MailGrabber.desktop /app/share/applications/io.github.thomasn.MailGrabber.desktop
+      - install -Dm644 assets/io.github.thomasn.MailGrabber.metainfo.xml /app/share/metainfo/io.github.thomasn.MailGrabber.metainfo.xml
+      - install -Dm644 assets/io.github.thomasn.MailGrabber.svg /app/share/icons/hicolor/scalable/apps/io.github.thomasn.MailGrabber.svg
+    sources:
+      - type: dir
+        path: .

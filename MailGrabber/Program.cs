@@ -19,8 +19,18 @@ internal static class Program
 		var runCli = args.Any(argument => argument.Equals("--cli", StringComparison.OrdinalIgnoreCase));
 		if (!runCli)
 		{
-			BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
-			return 0;
+			try
+			{
+				BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+				return 0;
+			}
+			catch (Exception exception) when (IsDisplayInitializationFailure(exception))
+			{
+				Console.Error.WriteLine("Could not connect to a graphical display.");
+				Console.Error.WriteLine("If you are in a Wayland session, ensure XWayland is enabled so DISPLAY is available.");
+				Console.Error.WriteLine("You can still run CLI mode: MailGrabber --cli --config appsettings.json");
+				return 2;
+			}
 		}
 
 		var cliArguments = args.Where(argument => !argument.Equals("--cli", StringComparison.OrdinalIgnoreCase)).ToArray();
@@ -102,5 +112,11 @@ internal static class Program
 		Console.WriteLine("  MAILGRABBER_MAX_MESSAGES");
 		Console.WriteLine("  MAILGRABBER_PAGE_SIZE");
 		Console.WriteLine("  MAILGRABBER_OLDEST_MESSAGE_AGE_DAYS");
+	}
+
+	private static bool IsDisplayInitializationFailure(Exception exception)
+	{
+		return exception.ToString().Contains("XOpenDisplay failed", StringComparison.OrdinalIgnoreCase)
+			|| exception.ToString().Contains("Unable to initialize", StringComparison.OrdinalIgnoreCase);
 	}
 }

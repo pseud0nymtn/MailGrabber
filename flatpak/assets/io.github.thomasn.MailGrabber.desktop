@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=MailGrabber
+Comment=Analyze Outlook and Gmail senders and generate clustering reports
+Exec=mailgrabber
+Icon=io.github.thomasn.MailGrabber
+Terminal=false
+Categories=Office;Utility;
+StartupNotify=true
