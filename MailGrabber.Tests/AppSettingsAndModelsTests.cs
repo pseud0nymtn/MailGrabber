@@ -92,6 +92,24 @@ public class AppSettingsAndModelsTests
     }
 
     [Test]
+    public void Validate_Throws_WhenOldestMessageAgeDaysIsNegative()
+    {
+        var settings = new AppSettings
+        {
+            EnableOutlook = true,
+            EnableGmail = false,
+            ClientId = "valid-client",
+            MaxMessages = 1,
+            PageSize = 50,
+            OldestMessageAgeDays = -1
+        };
+
+        var action = () => settings.Validate();
+
+        Assert.That(action, Throws.InvalidOperationException.With.Message.Contains("OldestMessageAgeDays"));
+    }
+
+    [Test]
     public void Validate_DoesNotThrow_ForValidSettings()
     {
         var settings = new AppSettings

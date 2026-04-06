@@ -25,6 +25,8 @@ public sealed class MainWindowSettingsState
 
     public int MaxMessages { get; init; }
 
+    public int OldestMessageAgeDays { get; init; }
+
     public bool EnableNewsletterClustering { get; init; }
 
     public string ConfigPath { get; init; } = "appsettings.json";
@@ -105,6 +107,7 @@ public sealed class MainWindowDialogService(Window owner) : IMainWindowDialogSer
             EnableGmail = current.EnableGmail,
             EnableNewsletterClustering = current.EnableNewsletterClustering,
             MaxMessages = current.MaxMessages,
+            OldestMessageAgeDays = current.OldestMessageAgeDays,
             ConfigPath = current.ConfigPath,
             ClientId = current.ClientId,
             GmailClientSecretsPath = current.GmailClientSecretsPath,
@@ -141,6 +144,7 @@ public sealed class MainWindowDialogService(Window owner) : IMainWindowDialogSer
             MaxMessages = settingsViewModel.MaxMessages,
             EnableNewsletterClustering = settingsViewModel.EnableNewsletterClustering,
             ConfigPath = settingsViewModel.ConfigPath,
+            OldestMessageAgeDays = settingsViewModel.OldestMessageAgeDays,
             ClientId = settingsViewModel.ClientId,
             GmailClientSecretsPath = settingsViewModel.GmailClientSecretsPath,
             OutputPath = settingsViewModel.OutputPath,

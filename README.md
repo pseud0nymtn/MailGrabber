@@ -79,6 +79,7 @@ Important fields:
 - GmailClientSecretsPath: path to Google OAuth client file.
 - OutputPath / JsonOutputPath / HtmlOutputPath: report output files.
 - MaxMessages: max messages fetched per enabled provider.
+- OldestMessageAgeDays: only fetch messages newer than this many days (0 means no date limit).
 
 Environment variable overrides are supported, including:
 
@@ -99,6 +100,7 @@ Environment variable overrides are supported, including:
 - MAILGRABBER_ALLOW_UNENCRYPTED_TOKEN_CACHE
 - MAILGRABBER_MAX_MESSAGES
 - MAILGRABBER_PAGE_SIZE
+- MAILGRABBER_OLDEST_MESSAGE_AGE_DAYS
 
 ## Output Formats
 
@@ -139,6 +141,7 @@ Default files:
 
 - The app starts in a desktop window by default.
 - `Run Analysis` executes the same pipeline as CLI mode.
+- Result list can be filtered by `Received in last days` and exact `From`/`To` date (`yyyy-MM-dd`).
 - `Open Viewer` launches the generated HTML viewer.
 - `Open Output Folder` opens the export folder in your file manager.
 

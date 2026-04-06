@@ -36,6 +36,7 @@ internal static class Program
 			Console.WriteLine($"JSON output: {Path.GetFullPath(settings.JsonOutputPath)}");
 			Console.WriteLine($"HTML viewer: {Path.GetFullPath(settings.HtmlOutputPath)}");
 			Console.WriteLine($"Max messages: {settings.MaxMessages}");
+			Console.WriteLine($"Oldest message age days: {settings.OldestMessageAgeDays}");
 			Console.WriteLine();
 
 			var result = await MailGrabberRunner.RunAsync(settings);
@@ -80,7 +81,7 @@ internal static class Program
 		Console.WriteLine();
 		Console.WriteLine("Usage:");
 		Console.WriteLine("  dotnet run --                  (starts Avalonia desktop UI)");
-		Console.WriteLine("  dotnet run -- --cli [--config appsettings.json] [--output output/sender-clusters.csv] [--json-output output/sender-clusters.json] [--html-output output/cluster-viewer.html]");
+		Console.WriteLine("  dotnet run -- --cli [--config appsettings.json] [--output output/sender-clusters.csv] [--json-output output/sender-clusters.json] [--html-output output/cluster-viewer.html] [--oldest-message-age-days 30]");
 		Console.WriteLine();
 		Console.WriteLine("Environment variable overrides:");
 		Console.WriteLine("  MAILGRABBER_ENABLE_OUTLOOK");
@@ -100,5 +101,6 @@ internal static class Program
 		Console.WriteLine("  MAILGRABBER_ALLOW_UNENCRYPTED_TOKEN_CACHE");
 		Console.WriteLine("  MAILGRABBER_MAX_MESSAGES");
 		Console.WriteLine("  MAILGRABBER_PAGE_SIZE");
+		Console.WriteLine("  MAILGRABBER_OLDEST_MESSAGE_AGE_DAYS");
 	}
 }

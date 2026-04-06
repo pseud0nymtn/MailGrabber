@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MailGrabber.csproj" />
+    <ProjectReference Include="..\MailGrabber\MailGrabber.csproj" />
   </ItemGroup>
 
 </Project>

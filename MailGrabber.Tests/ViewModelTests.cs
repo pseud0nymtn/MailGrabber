@@ -77,6 +77,7 @@ public class ViewModelTests
             Assert.That(vm.Providers, Is.EqualTo("gmail, outlook"));
             Assert.That(vm.Accounts, Is.EqualTo("private"));
             Assert.That(vm.SampleSubjects, Is.EqualTo("A | B"));
+            Assert.That(vm.LastSeenDisplay, Is.EqualTo("-"));
         });
     }
 
@@ -119,6 +120,7 @@ public class ViewModelTests
                 GmailClientSecretsPath = "gmail-secret.json",
                 EnableNewsletterClustering = false,
                 MaxMessages = 77,
+                OldestMessageAgeDays = 21,
                 OutputPath = "x.csv",
                 JsonOutputPath = "x.json",
                 HtmlOutputPath = "x.html"
@@ -134,6 +136,7 @@ public class ViewModelTests
                 Assert.That(written, Does.Contain("\"EnableGmail\": true"));
                 Assert.That(written, Does.Contain("\"ClientId\": \"view-client-id\""));
                 Assert.That(written, Does.Contain("\"GmailClientSecretsPath\": \"gmail-secret.json\""));
+                Assert.That(written, Does.Contain("\"OldestMessageAgeDays\": 21"));
             });
         }
         finally
@@ -147,7 +150,7 @@ public class ViewModelTests
     {
         var vm = new MainWindowViewModel();
 
-        vm.ApplySettings(false, false, 10, true, "appsettings.json", "", "google-client-secret.json", "a.csv", "a.json", "a.html");
+        vm.ApplySettings(false, false, 10, 0, true, "appsettings.json", "", "google-client-secret.json", "a.csv", "a.json", "a.html");
 
         Assert.That(vm.RunCommand.CanExecute(null), Is.True);
         await vm.RunCommand.ExecuteAsync(null);
@@ -186,6 +189,7 @@ public class ViewModelTests
                             SenderName = "News",
                             Domain = "example.com",
                             MessageCount = 1,
+                            LastSeenUtc = DateTimeOffset.UtcNow,
                             Providers = ["gmail"],
                             SourceAccounts = ["acc"],
                             SampleSubjects = ["Hi"]
@@ -207,6 +211,7 @@ public class ViewModelTests
                             SenderName = "Work",
                             Domain = "example.com",
                             MessageCount = 1,
+                            LastSeenUtc = DateTimeOffset.UtcNow.AddDays(-30),
                             Providers = ["outlook"],
                             SourceAccounts = ["acc"],
                             SampleSubjects = ["Hi"]
@@ -231,7 +236,33 @@ public class ViewModelTests
         });
 
         vm.ClearFilterCommand.Execute(null);
-        Assert.That(vm.MarkedClusterCount, Is.EqualTo(0));
+        Assert.Multiple(() =>
+        {
+            Assert.That(vm.MarkedClusterCount, Is.EqualTo(0));
+            Assert.That(vm.ReceivedWithinDaysFilter, Is.EqualTo(0));
+            Assert.That(vm.ReceivedFromDate, Is.Null);
+            Assert.That(vm.ReceivedToDate, Is.Null);
+        });
+
+        vm.ReceivedWithinDaysFilter = 7;
+        Assert.That(vm.Clusters.Count, Is.EqualTo(1));
+
+        vm.ReceivedWithinDaysFilter = 0;
+        vm.ReceivedFromDate = DateTime.UtcNow.AddDays(-2).Date;
+        vm.ReceivedToDate = DateTime.UtcNow.Date;
+        Assert.That(vm.Clusters.Count, Is.EqualTo(1));
+
+        vm.ReceivedFromDate = DateTime.UtcNow.AddDays(-40).Date;
+        vm.ReceivedToDate = DateTime.UtcNow.AddDays(-20).Date;
+        Assert.That(vm.Clusters.Count, Is.EqualTo(1));
+
+        vm.ReceivedFromDate = DateTime.UtcNow.AddDays(-40).Date;
+        vm.ReceivedToDate = DateTime.UtcNow.Date;
+        Assert.That(vm.Clusters.Count, Is.EqualTo(2));
+
+        vm.ReceivedFromDate = null;
+        vm.ReceivedToDate = null;
+        Assert.That(vm.Clusters.Count, Is.EqualTo(2));
     }
 
     [TestCase("hell", "Hell")]
@@ -284,7 +315,7 @@ public class ViewModelTests
             var whenBusy = (bool)canOpenMethod!.Invoke(vm, null)!;
 
             vm.IsBusy = false;
-            vm.ApplySettings(true, false, 1, true, "appsettings.json", "", "google-client-secret.json", "a.csv", "a.json", htmlPath);
+            vm.ApplySettings(true, false, 1, 0, true, "appsettings.json", "", "google-client-secret.json", "a.csv", "a.json", htmlPath);
             var whenMissing = (bool)canOpenMethod.Invoke(vm, null)!;
 
             File.WriteAllText(htmlPath, "<html></html>");

@@ -86,7 +86,21 @@ public sealed class OutlookGraphClient : IDisposable
     {
         var select = Uri.EscapeDataString("subject,receivedDateTime,from,sender");
         var orderBy = Uri.EscapeDataString("receivedDateTime desc");
-        return $"https://graph.microsoft.com/v1.0/me/mailFolders/inbox/messages?$select={select}&$orderby={orderBy}&$top={_settings.PageSize}";
+        var filterClause = BuildReceivedDateFilter();
+        return $"https://graph.microsoft.com/v1.0/me/mailFolders/inbox/messages?$select={select}&$orderby={orderBy}&$top={_settings.PageSize}{filterClause}";
+    }
+
+    private string BuildReceivedDateFilter()
+    {
+        if (_settings.OldestMessageAgeDays <= 0)
+        {
+            return string.Empty;
+        }
+
+        var cutoff = DateTimeOffset.UtcNow.AddDays(-_settings.OldestMessageAgeDays);
+        var isoCutoff = cutoff.ToString("yyyy-MM-ddTHH:mm:ssZ");
+        var filter = Uri.EscapeDataString($"receivedDateTime ge {isoCutoff}");
+        return $"&$filter={filter}";
     }
 
     private DeviceCodeCredential CreateCredential(AuthenticationRecord? authenticationRecord)

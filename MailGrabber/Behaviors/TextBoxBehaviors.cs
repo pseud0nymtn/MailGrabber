@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Threading;
 
 namespace MailGrabber.Behaviors;
 
@@ -11,6 +12,7 @@ public sealed class TextBoxBehaviors
     static TextBoxBehaviors()
     {
         AutoScrollToEndProperty.Changed.AddClassHandler<TextBox>(OnAutoScrollToEndChanged);
+        TextBox.TextProperty.Changed.AddClassHandler<TextBox>(OnTextPropertyChanged);
     }
 
     public static bool GetAutoScrollToEnd(TextBox textBox)
@@ -32,17 +34,14 @@ public sealed class TextBoxBehaviors
 
         if (isEnabled)
         {
-            textBox.TextChanged += OnTextChanged;
             MoveCaretToEnd(textBox);
             return;
         }
-
-        textBox.TextChanged -= OnTextChanged;
     }
 
-    private static void OnTextChanged(object? sender, TextChangedEventArgs e)
+    private static void OnTextPropertyChanged(TextBox textBox, AvaloniaPropertyChangedEventArgs args)
     {
-        if (sender is TextBox textBox)
+        if (GetAutoScrollToEnd(textBox))
         {
             MoveCaretToEnd(textBox);
         }
@@ -50,6 +49,18 @@ public sealed class TextBoxBehaviors
 
     private static void MoveCaretToEnd(TextBox textBox)
     {
-        textBox.CaretIndex = textBox.Text?.Length ?? 0;
+        var index = textBox.Text?.Length ?? 0;
+
+        // Do one immediate update and one deferred update after layout,
+        // so multiline read-only boxes reliably land on the real last line.
+        MoveCaretAndScroll(textBox, index);
+        Dispatcher.UIThread.Post(() => MoveCaretAndScroll(textBox, index), DispatcherPriority.Background);
+    }
+
+    private static void MoveCaretAndScroll(TextBox textBox, int index)
+    {
+        textBox.CaretIndex = index;
+        textBox.SelectionStart = index;
+        textBox.SelectionEnd = index;
     }
 }

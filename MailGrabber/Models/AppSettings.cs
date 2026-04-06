@@ -65,6 +65,9 @@ public partial class AppSettings : ObservableObject
     private int pageSize = 50;
 
     [ObservableProperty]
+    private int oldestMessageAgeDays;
+
+    [ObservableProperty]
     private bool enableNewsletterClustering = true;
 
     [ObservableProperty]
@@ -140,6 +143,11 @@ public partial class AppSettings : ObservableObject
         if (PageSize <= 0 || PageSize > 1000)
         {
             throw new InvalidOperationException("PageSize must be between 1 and 1000.");
+        }
+
+        if (OldestMessageAgeDays < 0)
+        {
+            throw new InvalidOperationException("OldestMessageAgeDays must be greater than or equal to 0.");
         }
     }
 }

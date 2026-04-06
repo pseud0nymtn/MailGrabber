@@ -104,6 +104,11 @@ public static class ConfigurationLoader
         {
             settings.PageSize = pageSize;
         }
+
+        if (int.TryParse(GetEnvironmentValue("MAILGRABBER_OLDEST_MESSAGE_AGE_DAYS"), out var oldestMessageAgeDays))
+        {
+            settings.OldestMessageAgeDays = oldestMessageAgeDays;
+        }
     }
 
     private static void ApplyArgumentOverrides(AppSettings settings, string[] args)
@@ -196,6 +201,10 @@ public static class ConfigurationLoader
                     break;
                 case "--page-size" when int.TryParse(args[index + 1], out var pageSize):
                     settings.PageSize = pageSize;
+                    index++;
+                    break;
+                case "--oldest-message-age-days" when int.TryParse(args[index + 1], out var oldestMessageAgeDays):
+                    settings.OldestMessageAgeDays = oldestMessageAgeDays;
                     index++;
                     break;
             }

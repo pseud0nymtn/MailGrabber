@@ -9,6 +9,14 @@ public static class MailGrabberRunner
     public static async Task<MailGrabberRunResult> RunAsync(AppSettings settings, Action<string>? log = null)
     {
         var messages = new List<MailboxMessage>();
+        var receivedAfterUtc = settings.OldestMessageAgeDays > 0
+            ? DateTimeOffset.UtcNow.AddDays(-settings.OldestMessageAgeDays)
+            : (DateTimeOffset?)null;
+
+        if (receivedAfterUtc is not null)
+        {
+            log?.Invoke($"Applying oldest-message cutoff: {receivedAfterUtc:O} (last {settings.OldestMessageAgeDays} days)");
+        }
 
         if (settings.EnableOutlook)
         {
@@ -24,6 +32,14 @@ public static class MailGrabberRunner
             var gmailClient = new GmailClient(settings);
             messages.AddRange(await gmailClient.GetInboxMessagesAsync());
             log?.Invoke("Gmail inbox finished.");
+        }
+
+        if (receivedAfterUtc is not null)
+        {
+            messages = messages
+                .Where(message => message.ReceivedDateTime is null || message.ReceivedDateTime >= receivedAfterUtc)
+                .ToList();
+            log?.Invoke($"Messages after cutoff: {messages.Count}");
         }
 
         log?.Invoke("Clustering senders...");

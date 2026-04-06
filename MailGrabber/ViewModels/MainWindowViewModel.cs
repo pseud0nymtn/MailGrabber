@@ -27,6 +27,7 @@ public partial class MainWindowViewModel : ObservableObject
     private bool _enableGmailOverride;
     private bool _enableNewsletterClusteringOverride = true;
     private int _maxMessagesOverride = 2000;
+    private int _oldestMessageAgeDaysOverride;
     private string _clientIdOverride = "YOUR-CLIENT-ID-HERE";
     private string _gmailClientSecretsPathOverride = "google-client-secret.json";
     private string _outputPathOverride = "output/sender-clusters.csv";
@@ -73,6 +74,15 @@ public partial class MainWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private string selectedThemeMode = "System";
+
+    [ObservableProperty]
+    private int receivedWithinDaysFilter;
+
+    [ObservableProperty]
+    private DateTime? receivedFromDate;
+
+    [ObservableProperty]
+    private DateTime? receivedToDate;
 
     public MainWindowViewModel()
         : this(new NullMainWindowDialogService())
@@ -185,6 +195,24 @@ public partial class MainWindowViewModel : ObservableObject
         RefreshFilterClusters();
     }
 
+    partial void OnReceivedWithinDaysFilterChanged(int value)
+    {
+        ApplyFiltersAndSearch();
+        RefreshSenderRows();
+    }
+
+    partial void OnReceivedFromDateChanged(DateTime? value)
+    {
+        ApplyFiltersAndSearch();
+        RefreshSenderRows();
+    }
+
+    partial void OnReceivedToDateChanged(DateTime? value)
+    {
+        ApplyFiltersAndSearch();
+        RefreshSenderRows();
+    }
+
     partial void OnSearchTextChanged(string value)
     {
         ApplyFiltersAndSearch();
@@ -217,16 +245,16 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
-    public (bool EnableOutlook, bool EnableGmail, int MaxMessages, bool EnableNewsletterClustering,
+    public (bool EnableOutlook, bool EnableGmail, int MaxMessages, int OldestMessageAgeDays, bool EnableNewsletterClustering,
         string ConfigPath, string ClientId, string GmailClientSecretsPath,
         string OutputPath, string JsonOutputPath, string HtmlOutputPath) GetCurrentSettings()
     {
-        return (_enableOutlookOverride, _enableGmailOverride, _maxMessagesOverride, _enableNewsletterClusteringOverride,
+        return (_enableOutlookOverride, _enableGmailOverride, _maxMessagesOverride, _oldestMessageAgeDaysOverride, _enableNewsletterClusteringOverride,
             ConfigPath, _clientIdOverride, _gmailClientSecretsPathOverride,
             _outputPathOverride, _jsonOutputPathOverride, _htmlOutputPathOverride);
     }
 
-    public void ApplySettings(bool enableOutlook, bool enableGmail, int maxMessages,
+    public void ApplySettings(bool enableOutlook, bool enableGmail, int maxMessages, int oldestMessageAgeDays,
         bool enableNewsletterClustering, string newConfigPath,
         string clientId, string gmailClientSecretsPath,
         string outputPath, string jsonOutputPath, string htmlOutputPath)
@@ -234,6 +262,7 @@ public partial class MainWindowViewModel : ObservableObject
         _enableOutlookOverride = enableOutlook;
         _enableGmailOverride = enableGmail;
         _maxMessagesOverride = maxMessages;
+        _oldestMessageAgeDaysOverride = oldestMessageAgeDays;
         _enableNewsletterClusteringOverride = enableNewsletterClustering;
         ConfigPath = newConfigPath;
         _clientIdOverride = clientId;
@@ -255,6 +284,7 @@ public partial class MainWindowViewModel : ObservableObject
             _enableGmailOverride = settings.EnableGmail;
             _enableNewsletterClusteringOverride = settings.EnableNewsletterClustering;
             _maxMessagesOverride = settings.MaxMessages;
+            _oldestMessageAgeDaysOverride = settings.OldestMessageAgeDays;
             _clientIdOverride = settings.ClientId;
             _gmailClientSecretsPathOverride = settings.GmailClientSecretsPath;
             _outputPathOverride = settings.OutputPath;
@@ -334,6 +364,7 @@ public partial class MainWindowViewModel : ObservableObject
             EnableOutlook = _enableOutlookOverride,
             EnableGmail = _enableGmailOverride,
             MaxMessages = _maxMessagesOverride,
+            OldestMessageAgeDays = _oldestMessageAgeDaysOverride,
             EnableNewsletterClustering = _enableNewsletterClusteringOverride,
             ConfigPath = ConfigPath,
             ClientId = _clientIdOverride,
@@ -355,6 +386,7 @@ public partial class MainWindowViewModel : ObservableObject
                 updated.EnableOutlook,
                 updated.EnableGmail,
                 updated.MaxMessages,
+                updated.OldestMessageAgeDays,
                 updated.EnableNewsletterClustering,
                 updated.ConfigPath,
                 updated.ClientId,
@@ -386,6 +418,7 @@ public partial class MainWindowViewModel : ObservableObject
             settings.EnableGmail = _enableGmailOverride;
             settings.EnableNewsletterClustering = _enableNewsletterClusteringOverride;
             settings.MaxMessages = _maxMessagesOverride;
+            settings.OldestMessageAgeDays = _oldestMessageAgeDaysOverride;
             settings.ClientId = _clientIdOverride;
             settings.GmailClientSecretsPath = _gmailClientSecretsPathOverride;
             settings.OutputPath = _outputPathOverride;
@@ -397,6 +430,7 @@ public partial class MainWindowViewModel : ObservableObject
             AppendLog($"Outlook enabled: {settings.EnableOutlook}");
             AppendLog($"Gmail enabled: {settings.EnableGmail}");
             AppendLog($"Max messages per provider: {settings.MaxMessages}");
+            AppendLog($"Oldest message age (days): {settings.OldestMessageAgeDays}");
 
             var result = await MailGrabberRunner.RunAsync(settings, AppendLog);
             LoadReport(result.Report);
@@ -505,6 +539,11 @@ public partial class MainWindowViewModel : ObservableObject
                 return false;
             }
 
+            if (!ClusterMatchesReceivedFilter(cluster))
+            {
+                return false;
+            }
+
             if (!hasSearch)
             {
                 return true;
@@ -512,9 +551,11 @@ public partial class MainWindowViewModel : ObservableObject
 
             return cluster.Cluster.Contains(search, StringComparison.OrdinalIgnoreCase)
                 || cluster.SenderAddresses.Any(s =>
+                    RowMatchesReceivedFilter(s)
+                    && (
                     s.SenderAddress.Contains(search, StringComparison.OrdinalIgnoreCase)
                     || s.Domain.Contains(search, StringComparison.OrdinalIgnoreCase)
-                    || (s.SenderName?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false));
+                    || (s.SenderName?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false)));
         }).ToList();
 
         foreach (var cluster in clustersToShow)
@@ -564,16 +605,18 @@ public partial class MainWindowViewModel : ObservableObject
             allSenders.AddRange(SelectedCluster.SenderAddresses);
         }
 
+        var receivedFiltered = allSenders.Where(RowMatchesReceivedFilter).ToList();
+
         // Apply search filter
         var search = SearchText?.Trim() ?? string.Empty;
         var hasSearch = !string.IsNullOrWhiteSpace(search);
 
         var senderRows = hasSearch
-            ? allSenders.Where(s =>
+            ? receivedFiltered.Where(s =>
                 s.SenderAddress.Contains(search, StringComparison.OrdinalIgnoreCase)
                 || s.Domain.Contains(search, StringComparison.OrdinalIgnoreCase)
                 || (s.SenderName?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false))
-            : allSenders;
+            : receivedFiltered;
 
         // Apply sorting if enabled
         if (SortSendersByDomain)
@@ -600,6 +643,9 @@ public partial class MainWindowViewModel : ObservableObject
     {
         SearchText = string.Empty;
         ShowOnlyMarkedClusters = false;
+        ReceivedWithinDaysFilter = 0;
+        ReceivedFromDate = null;
+        ReceivedToDate = null;
 
         foreach (var cluster in AllClusters)
         {
@@ -619,6 +665,79 @@ public partial class MainWindowViewModel : ObservableObject
         }
 
         SelectedFilterCluster.IsSelected = !SelectedFilterCluster.IsSelected;
+    }
+
+    private bool ClusterMatchesReceivedFilter(ClusterBucket cluster)
+    {
+        return cluster.SenderAddresses.Any(RowMatchesReceivedFilter);
+    }
+
+    private bool RowMatchesReceivedFilter(SenderRowViewModel row)
+    {
+        return RowMatchesReceivedFilter(row.LastSeenUtc, row.FirstSeenUtc);
+    }
+
+    private bool RowMatchesReceivedFilter(ClusteredSenderRow row)
+    {
+        return RowMatchesReceivedFilter(row.LastSeenUtc, row.FirstSeenUtc);
+    }
+
+    private bool RowMatchesReceivedFilter(DateTimeOffset? lastSeenUtc, DateTimeOffset? firstSeenUtc)
+    {
+        TryBuildExactDateRange(out var fromUtc, out var toUtcInclusive);
+
+        if (ReceivedWithinDaysFilter <= 0 && fromUtc is null && toUtcInclusive is null)
+        {
+            return true;
+        }
+
+        var receivedAt = lastSeenUtc ?? firstSeenUtc;
+
+        if (receivedAt is null)
+        {
+            return false;
+        }
+
+        if (ReceivedWithinDaysFilter > 0)
+        {
+            var cutoff = DateTimeOffset.UtcNow.AddDays(-ReceivedWithinDaysFilter);
+            if (receivedAt < cutoff)
+            {
+                return false;
+            }
+        }
+
+        if (fromUtc is not null && receivedAt < fromUtc)
+        {
+            return false;
+        }
+
+        if (toUtcInclusive is not null && receivedAt > toUtcInclusive)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool TryBuildExactDateRange(out DateTimeOffset? fromUtc, out DateTimeOffset? toUtcInclusive)
+    {
+        fromUtc = null;
+        toUtcInclusive = null;
+
+        if (ReceivedFromDate is DateTime fromDate)
+        {
+            var fromStartUtc = new DateTimeOffset(DateTime.SpecifyKind(fromDate.Date, DateTimeKind.Utc));
+            fromUtc = fromStartUtc;
+        }
+
+        if (ReceivedToDate is DateTime toDate)
+        {
+            var toStartUtc = new DateTimeOffset(DateTime.SpecifyKind(toDate.Date, DateTimeKind.Utc));
+            toUtcInclusive = toStartUtc.AddDays(1).AddTicks(-1);
+        }
+
+        return fromUtc is not null || toUtcInclusive is not null;
     }
 
     private static void ApplyThemeMode(string? mode)
@@ -868,6 +987,12 @@ public partial class SenderRowViewModel : ObservableObject
     [ObservableProperty]
     private string sampleSubjects = string.Empty;
 
+    [ObservableProperty]
+    private DateTimeOffset? firstSeenUtc;
+
+    [ObservableProperty]
+    private DateTimeOffset? lastSeenUtc;
+
     public SenderRowViewModel(ClusteredSenderRow row)
     {
         SenderAddress = row.SenderAddress;
@@ -877,5 +1002,9 @@ public partial class SenderRowViewModel : ObservableObject
         Providers = string.Join(", ", row.Providers);
         Accounts = string.Join(", ", row.SourceAccounts);
         SampleSubjects = row.SampleSubjects.Count == 0 ? "-" : string.Join(" | ", row.SampleSubjects);
+        FirstSeenUtc = row.FirstSeenUtc;
+        LastSeenUtc = row.LastSeenUtc;
     }
+
+    public string LastSeenDisplay => LastSeenUtc?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "-";
 }

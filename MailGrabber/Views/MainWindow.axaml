@@ -56,12 +56,39 @@
 
     <!-- Search Row -->
     <Border Grid.Row="2" Classes="card">
-      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+      <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10">
         <TextBox Grid.Column="0"
                  Watermark="Search clusters and senders..."
                  Text="{Binding SearchText}" />
 
-        <Button Grid.Column="1"
+        <TextBlock Grid.Column="1"
+                   VerticalAlignment="Center"
+                   Text="Received in last days:" />
+
+        <NumericUpDown Grid.Column="2"
+                       Width="100"
+                       Minimum="0"
+                       Maximum="36500"
+                       FormatString="0"
+                       Value="{Binding ReceivedWithinDaysFilter}" />
+
+        <TextBlock Grid.Column="3"
+             VerticalAlignment="Center"
+             Text="From:" />
+
+        <DatePicker Grid.Column="4"
+              Width="140"
+              SelectedDate="{Binding ReceivedFromDate}" />
+
+        <TextBlock Grid.Column="5"
+             VerticalAlignment="Center"
+             Text="To:" />
+
+        <DatePicker Grid.Column="6"
+              Width="140"
+              SelectedDate="{Binding ReceivedToDate}" />
+
+        <Button Grid.Column="7"
                 MinWidth="100"
                 Command="{Binding ClearFilterCommand}"
                 Content="Clear Filters" />
@@ -147,14 +174,15 @@
             <ListBox.ItemTemplate>
               <DataTemplate x:DataType="vm:SenderRowViewModel">
                 <Border Margin="0,0,0,6" Padding="10" Classes="senderRow">
-                  <Grid ColumnDefinitions="2.5*,1.1*,0.8*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="8" RowSpacing="4">
+                  <Grid ColumnDefinitions="2.5*,1.1*,0.8*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="8" RowSpacing="4">
                     <TextBlock Grid.Column="0" Text="{Binding SenderAddress}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                     <TextBlock Grid.Column="1" Text="{Binding Domain}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Grid.Column="2" Text="{Binding MessageCount}" HorizontalAlignment="Right" />
 
                     <TextBlock Grid.Row="1" Grid.ColumnSpan="3" Text="{Binding SenderName}" Opacity="0.85" TextTrimming="CharacterEllipsis" />
                     <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="{Binding Providers}" Opacity="0.8" FontSize="11" />
-                    <TextBlock Grid.Row="3" Grid.ColumnSpan="3" Text="{Binding SampleSubjects}" Opacity="0.7" TextWrapping="Wrap" FontSize="11" />
+                    <TextBlock Grid.Row="3" Grid.ColumnSpan="3" Text="{Binding LastSeenDisplay, StringFormat='Last received: {0}'}" Opacity="0.7" FontSize="11" />
+                    <TextBlock Grid.Row="4" Grid.ColumnSpan="3" Text="{Binding SampleSubjects}" Opacity="0.7" TextWrapping="Wrap" FontSize="11" />
                   </Grid>
                 </Border>
               </DataTemplate>

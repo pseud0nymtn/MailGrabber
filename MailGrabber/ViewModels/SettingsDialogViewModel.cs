@@ -26,6 +26,9 @@ public partial class SettingsDialogViewModel : ObservableObject
     private int maxMessages = 2000;
 
     [ObservableProperty]
+    private int oldestMessageAgeDays;
+
+    [ObservableProperty]
     private string configPath = "appsettings.json";
 
     [ObservableProperty]
@@ -68,6 +71,7 @@ public partial class SettingsDialogViewModel : ObservableObject
         settings.GmailClientSecretsPath = GmailClientSecretsPath;
         settings.EnableNewsletterClustering = EnableNewsletterClustering;
         settings.MaxMessages = MaxMessages;
+        settings.OldestMessageAgeDays = OldestMessageAgeDays;
         settings.OutputPath = OutputPath;
         settings.JsonOutputPath = JsonOutputPath;
         settings.HtmlOutputPath = HtmlOutputPath;

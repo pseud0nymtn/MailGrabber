@@ -33,7 +33,8 @@ public class ConfigurationLoaderTests
                 "--enable-gmail", "true",
                 "--output", "arg.csv",
                 "--max-messages", "99",
-                "--page-size", "33"
+                "--page-size", "33",
+                "--oldest-message-age-days", "14"
             ]);
 
             Assert.Multiple(() =>
@@ -43,6 +44,7 @@ public class ConfigurationLoaderTests
                 Assert.That(loaded.OutputPath, Is.EqualTo("arg.csv"));
                 Assert.That(loaded.MaxMessages, Is.EqualTo(99));
                 Assert.That(loaded.PageSize, Is.EqualTo(33));
+                Assert.That(loaded.OldestMessageAgeDays, Is.EqualTo(14));
             });
         }
         finally
@@ -71,7 +73,8 @@ public class ConfigurationLoaderTests
             ["MAILGRABBER_TOKEN_CACHE_NAME"] = "cache",
             ["MAILGRABBER_ALLOW_UNENCRYPTED_TOKEN_CACHE"] = "false",
             ["MAILGRABBER_MAX_MESSAGES"] = "123",
-            ["MAILGRABBER_PAGE_SIZE"] = "77"
+            ["MAILGRABBER_PAGE_SIZE"] = "77",
+            ["MAILGRABBER_OLDEST_MESSAGE_AGE_DAYS"] = "45"
         });
 
         var loaded = ConfigurationLoader.Load(Array.Empty<string>());
@@ -94,6 +97,7 @@ public class ConfigurationLoaderTests
             Assert.That(loaded.AllowUnencryptedTokenCache, Is.False);
             Assert.That(loaded.MaxMessages, Is.EqualTo(123));
             Assert.That(loaded.PageSize, Is.EqualTo(77));
+            Assert.That(loaded.OldestMessageAgeDays, Is.EqualTo(45));
         });
     }
 

@@ -76,6 +76,15 @@
                                 FormatString="0"
                                 Value="{Binding MaxMessages}" />
                         </Grid>
+                        <Grid ColumnDefinitions="180,*" ColumnSpacing="10">
+                            <TextBlock Classes="settingsLabel" VerticalAlignment="Center" Text="Oldest Mail Age (days):" />
+                            <NumericUpDown
+                                Grid.Column="1"
+                                Maximum="36500"
+                                Minimum="0"
+                                FormatString="0"
+                                Value="{Binding OldestMessageAgeDays}" />
+                        </Grid>
                     </StackPanel>
                 </Border>
 

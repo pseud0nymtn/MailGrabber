@@ -32,11 +32,13 @@ public sealed class GmailClient
 
         var results = new List<MailboxMessage>();
         string? nextPageToken = null;
+        var query = BuildInboxQuery();
 
         while (results.Count < _settings.MaxMessages)
         {
             var listRequest = service.Users.Messages.List(_settings.GmailUserId);
             listRequest.LabelIds = new[] { "INBOX" };
+            listRequest.Q = query;
             listRequest.MaxResults = Math.Min(500, _settings.MaxMessages - results.Count);
             listRequest.PageToken = nextPageToken;
 
@@ -70,6 +72,17 @@ public sealed class GmailClient
         }
 
         return results;
+    }
+
+    private string? BuildInboxQuery()
+    {
+        if (_settings.OldestMessageAgeDays <= 0)
+        {
+            return null;
+        }
+
+        var cutoffUnixSeconds = DateTimeOffset.UtcNow.AddDays(-_settings.OldestMessageAgeDays).ToUnixTimeSeconds();
+        return $"after:{cutoffUnixSeconds}";
     }
 
     private async Task<UserCredential> AuthorizeAsync(CancellationToken cancellationToken)
