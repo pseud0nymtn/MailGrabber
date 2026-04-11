@@ -35,6 +35,8 @@ public partial class MainWindowViewModel : ObservableObject
     private string _htmlOutputPathOverride = "output/cluster-viewer.html";
     private AppSettings? _lastLoadedSettings;
     private readonly IMainWindowDialogService _dialogService;
+    private bool _suppressClusterSelectionChanged;
+    private bool _suppressSelectAllClustersToggleChanged;
 
     [ObservableProperty]
     private string configPath = "appsettings.json";
@@ -62,6 +64,9 @@ public partial class MainWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private int markedClusterCount;
+
+    [ObservableProperty]
+    private bool selectAllClustersToggle;
 
     [ObservableProperty]
     private bool showSendersFromAllMarkedClusters;
@@ -222,6 +227,16 @@ public partial class MainWindowViewModel : ObservableObject
     {
         RefreshFilterClusters();
         ApplyFiltersAndSearch();
+    }
+
+    partial void OnSelectAllClustersToggleChanged(bool value)
+    {
+        if (_suppressSelectAllClustersToggleChanged)
+        {
+            return;
+        }
+
+        SetAllClusterSelections(value);
     }
 
     partial void OnSelectedThemeModeChanged(string value)
@@ -468,6 +483,11 @@ public partial class MainWindowViewModel : ObservableObject
 
     private void OnClusterSelectionChanged()
     {
+        if (_suppressClusterSelectionChanged)
+        {
+            return;
+        }
+
         UpdateMarkedClusterCount();
         
         // Only refresh the filter list if "Show only marked" is active
@@ -489,6 +509,35 @@ public partial class MainWindowViewModel : ObservableObject
     {
         MarkedClusterCount = AllClusters.Count(c => c.IsSelected);
         ExportDomainsCommand.NotifyCanExecuteChanged();
+
+        var shouldBeOn = AllClusters.Count > 0 && MarkedClusterCount == AllClusters.Count;
+        if (SelectAllClustersToggle != shouldBeOn)
+        {
+            _suppressSelectAllClustersToggleChanged = true;
+            SelectAllClustersToggle = shouldBeOn;
+            _suppressSelectAllClustersToggleChanged = false;
+        }
+    }
+
+    private void SetAllClusterSelections(bool isSelected)
+    {
+        _suppressClusterSelectionChanged = true;
+        try
+        {
+            foreach (var cluster in AllClusters)
+            {
+                if (cluster.IsSelected != isSelected)
+                {
+                    cluster.IsSelected = isSelected;
+                }
+            }
+        }
+        finally
+        {
+            _suppressClusterSelectionChanged = false;
+        }
+
+        OnClusterSelectionChanged();
     }
 
     private void RefreshFilterClusters()
@@ -647,14 +696,7 @@ public partial class MainWindowViewModel : ObservableObject
         ReceivedFromDate = null;
         ReceivedToDate = null;
 
-        foreach (var cluster in AllClusters)
-        {
-            cluster.IsSelected = false;
-        }
-
-        UpdateMarkedClusterCount();
-        RefreshFilterClusters();
-        ApplyFiltersAndSearch();
+        SetAllClusterSelections(false);
     }
 
     private void ToggleSelectedFilterCluster()

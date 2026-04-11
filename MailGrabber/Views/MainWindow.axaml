@@ -1,152 +1,192 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+<Window
+  x:Class="MailGrabber.Views.MainWindow"
+  xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:behaviors="using:MailGrabber.Behaviors"
-        xmlns:vm="using:MailGrabber.ViewModels"
-        x:Class="MailGrabber.Views.MainWindow"
-        x:DataType="vm:MainWindowViewModel"
-        mc:Ignorable="d"
-        Width="1400"
-        Height="900"
-        Title="MailGrabber - Sender Cluster Studio"
-        Icon="/Assets/mailgrabber-icon.ico">
-  <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Margin="18" RowSpacing="12">
-    <!-- Header -->
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:vm="using:MailGrabber.ViewModels"
+  Title="MailGrabber - Sender Cluster Studio"
+  Width="1400"
+  Height="900"
+  x:DataType="vm:MainWindowViewModel"
+  Icon="/Assets/mailgrabber-icon.ico"
+  mc:Ignorable="d">
+  <Grid
+    Margin="18"
+    RowDefinitions="Auto,Auto,Auto,*,Auto"
+    RowSpacing="12">
+    <!--  Header  -->
     <TextBlock Classes="headline" Text="MailGrabber Sender Cluster Studio" />
 
-        <!-- Control Row -->
-        <Border Grid.Row="1" Classes="card">
-          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-            <StackPanel Orientation="Horizontal" Spacing="10">
-              <Button MinWidth="120"
-                      Command="{Binding RunCommand}"
-                      Content="Run Analysis" />
+    <!--  Control Row  -->
+    <Border Grid.Row="1" Classes="card">
+      <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+        <StackPanel Orientation="Horizontal" Spacing="10">
+          <Button
+            MinWidth="120"
+            Command="{Binding RunCommand}"
+            Content="Run Analysis" />
 
-                    <Button
-                      MinWidth="130"
-                      Command="{Binding OpenJsonCommand}"
-                      Content="Open JSON..." />
+          <Button
+            MinWidth="130"
+            Command="{Binding OpenJsonCommand}"
+            Content="Open JSON..." />
 
-              <Button MinWidth="120"
-                      Command="{Binding OpenHtmlViewerCommand}"
-                      Content="Open Viewer" />
+          <Button
+            MinWidth="120"
+            Command="{Binding OpenHtmlViewerCommand}"
+            Content="Open Viewer" />
 
-              <Button MinWidth="130"
-                      Command="{Binding OpenOutputFolderCommand}"
-                      Content="Open Output Folder" />
+          <Button
+            MinWidth="130"
+            Command="{Binding OpenOutputFolderCommand}"
+            Content="Open Output Folder" />
 
-                    <Button
-                      MinWidth="90"
-                      Command="{Binding OpenSettingsCommand}"
-                      Content="Settings" />
-            </StackPanel>
+          <Button
+            MinWidth="90"
+            Command="{Binding OpenSettingsCommand}"
+            Content="Settings" />
+        </StackPanel>
 
-            <StackPanel Grid.Column="1"
-                        Orientation="Horizontal"
-                        Spacing="8"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center">
-              <TextBlock VerticalAlignment="Center" Text="Schema" Opacity="0.8" />
-              <ComboBox MinWidth="130"
-                        ItemsSource="{Binding ThemeModeOptions}"
-                        SelectedItem="{Binding SelectedThemeMode}" />
-            </StackPanel>
-          </Grid>
-        </Border>
-
-    <!-- Search Row -->
-    <Border Grid.Row="2" Classes="card">
-      <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10">
-        <TextBox Grid.Column="0"
-                 Watermark="Search clusters and senders..."
-                 Text="{Binding SearchText}" />
-
-        <TextBlock Grid.Column="1"
-                   VerticalAlignment="Center"
-                   Text="Received in last days:" />
-
-        <NumericUpDown Grid.Column="2"
-                       Width="100"
-                       Minimum="0"
-                       Maximum="36500"
-                       FormatString="0"
-                       Value="{Binding ReceivedWithinDaysFilter}" />
-
-        <TextBlock Grid.Column="3"
-             VerticalAlignment="Center"
-             Text="From:" />
-
-        <DatePicker Grid.Column="4"
-              Width="140"
-              SelectedDate="{Binding ReceivedFromDate}" />
-
-        <TextBlock Grid.Column="5"
-             VerticalAlignment="Center"
-             Text="To:" />
-
-        <DatePicker Grid.Column="6"
-              Width="140"
-              SelectedDate="{Binding ReceivedToDate}" />
-
-        <Button Grid.Column="7"
-                MinWidth="100"
-                Command="{Binding ClearFilterCommand}"
-                Content="Clear Filters" />
+        <StackPanel
+          Grid.Column="1"
+          HorizontalAlignment="Right"
+          VerticalAlignment="Center"
+          Orientation="Horizontal"
+          Spacing="8">
+          <TextBlock
+            VerticalAlignment="Center"
+            Opacity="0.8"
+            Text="Schema" />
+          <ComboBox
+            MinWidth="130"
+            ItemsSource="{Binding ThemeModeOptions}"
+            SelectedItem="{Binding SelectedThemeMode}" />
+        </StackPanel>
       </Grid>
     </Border>
 
-    <!-- Main Content -->
-    <Grid Grid.Row="3" ColumnDefinitions="Auto,*" ColumnSpacing="12">
-      <!-- Clusters Panel -->
+    <!--  Search Row  -->
+    <Border Grid.Row="2" Classes="card">
+      <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10">
+        <TextBox
+          Grid.Column="0"
+          Text="{Binding SearchText}"
+          Watermark="Search clusters and senders..." />
+
+        <TextBlock
+          Grid.Column="1"
+          VerticalAlignment="Center"
+          Text="Received in last days:" />
+
+        <NumericUpDown
+          Grid.Column="2"
+          Width="100"
+          FormatString="0"
+          Maximum="36500"
+          Minimum="0"
+          Value="{Binding ReceivedWithinDaysFilter}" />
+
+        <TextBlock
+          Grid.Column="3"
+          VerticalAlignment="Center"
+          Text="From:" />
+
+        <DatePicker
+          Grid.Column="4"
+          Width="140"
+          SelectedDate="{Binding ReceivedFromDate}" />
+
+        <TextBlock
+          Grid.Column="5"
+          VerticalAlignment="Center"
+          Text="To:" />
+
+        <DatePicker
+          Grid.Column="6"
+          Width="140"
+          SelectedDate="{Binding ReceivedToDate}" />
+
+        <Button
+          Grid.Column="7"
+          MinWidth="100"
+          Command="{Binding ClearFilterCommand}"
+          Content="Clear Filters" />
+      </Grid>
+    </Border>
+
+    <!--  Main Content  -->
+    <Grid
+      Grid.Row="3"
+      ColumnDefinitions="Auto,*"
+      ColumnSpacing="12">
+      <!--  Clusters Panel  -->
       <Border Grid.Column="0" Classes="card">
         <Grid RowDefinitions="Auto,Auto,*" RowSpacing="8">
-          <TextBlock Text="Clusters (Mark to Filter)" FontSize="16" FontWeight="SemiBold" />
+          <TextBlock
+            FontSize="16"
+            FontWeight="SemiBold"
+            Text="Clusters (Mark to Filter)" />
 
-          <StackPanel Grid.Row="1"
-                      Orientation="Horizontal"
-                      Spacing="12"
-                      VerticalAlignment="Center">
-            <ToggleSwitch HorizontalAlignment="Left"
-                          Content="Show only marked"
-                          IsChecked="{Binding ShowOnlyMarkedClusters}" />
-                          <StackPanel Spacing="6" Orientation="Vertical">
-            <TextBlock VerticalAlignment="Center"
-                       Opacity="0.75"
-                       FontSize="12"
-                       Text="{Binding MarkedClusterCount, StringFormat='({0} marked)'}" />
-                <Button
-                    MinWidth="130"
-                    FontSize="12"
-                    Padding="8,4"
-                  Command="{Binding ExportDomainsCommand}"
-                    Content="Export Domains..." />
-                          </StackPanel>
+          <StackPanel
+            Grid.Row="1"
+            VerticalAlignment="Center"
+            Orientation="Horizontal"
+            Spacing="12">
+              <ToggleSwitch
+                HorizontalAlignment="Left"
+                Content="Select all"
+                IsChecked="{Binding SelectAllClustersToggle}" />
+            <ToggleSwitch
+              HorizontalAlignment="Left"
+              Content="Show only marked"
+              IsChecked="{Binding ShowOnlyMarkedClusters}" />
+            <StackPanel Orientation="Vertical" Spacing="6">
+              <TextBlock
+                VerticalAlignment="Center"
+                FontSize="12"
+                Opacity="0.75"
+                Text="{Binding MarkedClusterCount, StringFormat='({0} marked)'}" />
+              <Button
+                MinWidth="130"
+                Padding="8,4"
+                Command="{Binding ExportDomainsCommand}"
+                Content="Export Domains..."
+                FontSize="12" />
+            </StackPanel>
             <Separator Width="1" Opacity="0.28" />
-            <ToggleSwitch HorizontalAlignment="Left"
-                          Content="Sort alphabetically"
-                          IsChecked="{Binding SortClustersAlphabetically}" />
+            <ToggleSwitch
+              HorizontalAlignment="Left"
+              Content="Sort alphabetically"
+              IsChecked="{Binding SortClustersAlphabetically}" />
           </StackPanel>
 
-          <ListBox Grid.Row="2"
-                   x:Name="ClusterFilterList"
-                   ItemsSource="{Binding FilterClusters}"
-                   SelectionMode="Single"
-                   SelectedItem="{Binding SelectedFilterCluster}"
-                   Background="Transparent">
+          <ListBox
+            x:Name="ClusterFilterList"
+            Grid.Row="2"
+            Background="Transparent"
+            ItemsSource="{Binding FilterClusters}"
+            SelectedItem="{Binding SelectedFilterCluster}"
+            SelectionMode="Single">
             <ListBox.KeyBindings>
-              <KeyBinding Gesture="Space" Command="{Binding ToggleSelectedFilterClusterCommand}" />
+              <KeyBinding Command="{Binding ToggleSelectedFilterClusterCommand}" Gesture="Space" />
             </ListBox.KeyBindings>
             <ListBox.ItemTemplate>
               <DataTemplate x:DataType="vm:SelectableClusterViewModel">
-                <Grid Margin="0,2" ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                  <CheckBox Grid.Column="0"
-                            VerticalAlignment="Center"
-                            IsChecked="{Binding IsSelected}"
-                            Content="" />
-                  <TextBlock Grid.Column="1"
-                             VerticalAlignment="Center"
-                             Text="{Binding DisplayText}" />
+                <Grid
+                  Margin="0,2"
+                  ColumnDefinitions="Auto,*"
+                  ColumnSpacing="8">
+                  <CheckBox
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Content=""
+                    IsChecked="{Binding IsSelected}" />
+                  <TextBlock
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    Text="{Binding DisplayText}" />
                 </Grid>
               </DataTemplate>
             </ListBox.ItemTemplate>
@@ -154,36 +194,80 @@
         </Grid>
       </Border>
 
-      <!-- Senders Panel -->
+      <!--  Senders Panel  -->
       <Border Grid.Column="1" Classes="card">
         <Grid RowDefinitions="Auto,Auto,*" RowSpacing="8">
-          <TextBlock Text="Senders in Selected Cluster" FontSize="16" FontWeight="SemiBold" />
+          <TextBlock
+            FontSize="16"
+            FontWeight="SemiBold"
+            Text="Senders in Selected Cluster" />
 
-          <StackPanel Grid.Row="1"
-                      Orientation="Horizontal"
-                      Spacing="20"
-                      VerticalAlignment="Center">
-            <ToggleSwitch HorizontalAlignment="Left"
-                          Content="Show from all marked clusters"
-                          IsChecked="{Binding ShowSendersFromAllMarkedClusters}" />
-            <ToggleSwitch HorizontalAlignment="Left"
-                          Content="Sort by domain"
-                          IsChecked="{Binding SortSendersByDomain}" />
+          <StackPanel
+            Grid.Row="1"
+            VerticalAlignment="Center"
+            Orientation="Horizontal"
+            Spacing="20">
+            <ToggleSwitch
+              HorizontalAlignment="Left"
+              Content="Show from all marked clusters"
+              IsChecked="{Binding ShowSendersFromAllMarkedClusters}" />
+            <ToggleSwitch
+              HorizontalAlignment="Left"
+              Content="Sort by domain"
+              IsChecked="{Binding SortSendersByDomain}" />
           </StackPanel>
 
           <ListBox Grid.Row="2" ItemsSource="{Binding SenderRows}">
             <ListBox.ItemTemplate>
               <DataTemplate x:DataType="vm:SenderRowViewModel">
-                <Border Margin="0,0,0,6" Padding="10" Classes="senderRow">
-                  <Grid ColumnDefinitions="2.5*,1.1*,0.8*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="8" RowSpacing="4">
-                    <TextBlock Grid.Column="0" Text="{Binding SenderAddress}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                    <TextBlock Grid.Column="1" Text="{Binding Domain}" TextTrimming="CharacterEllipsis" />
-                    <TextBlock Grid.Column="2" Text="{Binding MessageCount}" HorizontalAlignment="Right" />
+                <Border
+                  Margin="0,0,0,6"
+                  Padding="10"
+                  Classes="senderRow">
+                  <Grid
+                    ColumnDefinitions="2.5*,1.1*,0.8*"
+                    ColumnSpacing="8"
+                    RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                    RowSpacing="4">
+                    <TextBlock
+                      Grid.Column="0"
+                      FontWeight="SemiBold"
+                      Text="{Binding SenderAddress}"
+                      TextTrimming="CharacterEllipsis" />
+                    <TextBlock
+                      Grid.Column="1"
+                      Text="{Binding Domain}"
+                      TextTrimming="CharacterEllipsis" />
+                    <TextBlock
+                      Grid.Column="2"
+                      HorizontalAlignment="Right"
+                      Text="{Binding MessageCount}" />
 
-                    <TextBlock Grid.Row="1" Grid.ColumnSpan="3" Text="{Binding SenderName}" Opacity="0.85" TextTrimming="CharacterEllipsis" />
-                    <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="{Binding Providers}" Opacity="0.8" FontSize="11" />
-                    <TextBlock Grid.Row="3" Grid.ColumnSpan="3" Text="{Binding LastSeenDisplay, StringFormat='Last received: {0}'}" Opacity="0.7" FontSize="11" />
-                    <TextBlock Grid.Row="4" Grid.ColumnSpan="3" Text="{Binding SampleSubjects}" Opacity="0.7" TextWrapping="Wrap" FontSize="11" />
+                    <TextBlock
+                      Grid.Row="1"
+                      Grid.ColumnSpan="3"
+                      Opacity="0.85"
+                      Text="{Binding SenderName}"
+                      TextTrimming="CharacterEllipsis" />
+                    <TextBlock
+                      Grid.Row="2"
+                      Grid.ColumnSpan="3"
+                      FontSize="11"
+                      Opacity="0.8"
+                      Text="{Binding Providers}" />
+                    <TextBlock
+                      Grid.Row="3"
+                      Grid.ColumnSpan="3"
+                      FontSize="11"
+                      Opacity="0.7"
+                      Text="{Binding LastSeenDisplay, StringFormat='Last received: {0}'}" />
+                    <TextBlock
+                      Grid.Row="4"
+                      Grid.ColumnSpan="3"
+                      FontSize="11"
+                      Opacity="0.7"
+                      Text="{Binding SampleSubjects}"
+                      TextWrapping="Wrap" />
                   </Grid>
                 </Border>
               </DataTemplate>
@@ -193,19 +277,29 @@
       </Border>
     </Grid>
 
-    <!-- Status Row -->
-    <Border Grid.Row="4" Classes="card" Padding="10">
+    <!--  Status Row  -->
+    <Border
+      Grid.Row="4"
+      Padding="10"
+      Classes="card">
       <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
-        <TextBlock Text="Run Status" FontSize="14" FontWeight="SemiBold" />
-        <TextBlock Grid.Row="1" Text="{Binding StatusMessage}" TextWrapping="Wrap" />
-        <TextBox Grid.Row="2"
-           x:Name="RunLogTextBox"
-                 IsReadOnly="True"
-                 Text="{Binding RunLog}"
-               behaviors:TextBoxBehaviors.AutoScrollToEnd="True"
-                 AcceptsReturn="True"
-                 Height="100"
-                 ScrollViewer.VerticalScrollBarVisibility="Auto" />
+        <TextBlock
+          FontSize="14"
+          FontWeight="SemiBold"
+          Text="Run Status" />
+        <TextBlock
+          Grid.Row="1"
+          Text="{Binding StatusMessage}"
+          TextWrapping="Wrap" />
+        <TextBox
+          x:Name="RunLogTextBox"
+          Grid.Row="2"
+          Height="100"
+          behaviors:TextBoxBehaviors.AutoScrollToEnd="True"
+          AcceptsReturn="True"
+          IsReadOnly="True"
+          ScrollViewer.VerticalScrollBarVisibility="Auto"
+          Text="{Binding RunLog}" />
       </Grid>
     </Border>
   </Grid>

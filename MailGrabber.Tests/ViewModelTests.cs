@@ -265,6 +265,75 @@ public class ViewModelTests
         Assert.That(vm.Clusters.Count, Is.EqualTo(2));
     }
 
+    [Test]
+    public void MainWindowViewModel_SelectAllClustersToggle_SelectsAndUnselectsAllFilterClusters()
+    {
+        var vm = new MainWindowViewModel();
+
+        var report = new ClusterReport
+        {
+            GeneratedAtUtc = DateTimeOffset.UtcNow,
+            TotalInputMessages = 2,
+            Clusters =
+            [
+                new ClusterBucket
+                {
+                    Cluster = "news",
+                    SenderCount = 1,
+                    MessageCount = 1,
+                    SenderAddresses =
+                    [
+                        new ClusteredSenderRow
+                        {
+                            Cluster = "news",
+                            SenderAddress = "n@example.com",
+                            Domain = "example.com",
+                            MessageCount = 1
+                        }
+                    ]
+                },
+                new ClusterBucket
+                {
+                    Cluster = "work",
+                    SenderCount = 1,
+                    MessageCount = 1,
+                    SenderAddresses =
+                    [
+                        new ClusteredSenderRow
+                        {
+                            Cluster = "work",
+                            SenderAddress = "w@example.com",
+                            Domain = "example.com",
+                            MessageCount = 1
+                        }
+                    ]
+                }
+            ]
+        };
+
+        var loadMethod = typeof(MainWindowViewModel).GetMethod("LoadReport", BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.That(loadMethod, Is.Not.Null);
+        loadMethod!.Invoke(vm, [report]);
+
+        vm.SelectAllClustersToggle = true;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(vm.MarkedClusterCount, Is.EqualTo(2));
+            Assert.That(vm.AllClusters.All(c => c.IsSelected), Is.True);
+            Assert.That(vm.SelectAllClustersToggle, Is.True);
+        });
+
+        vm.SelectAllClustersToggle = false;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(vm.MarkedClusterCount, Is.EqualTo(0));
+            Assert.That(vm.AllClusters.All(c => !c.IsSelected), Is.True);
+            Assert.That(vm.SelectAllClustersToggle, Is.False);
+        });
+    }
+
     [TestCase("hell", "Hell")]
     [TestCase("light", "Hell")]
     [TestCase("dunkel", "Dunkel")]
